@@ -1,0 +1,650 @@
+// Foodpanda Clone - Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  SUPER_ADMIN // Admin ດູແລລະບົບທັງໝົດ
+  MERCHANT_OWNER // ເຈົ້າຂອງຮ້ານ
+  MERCHANT_STAFF // ພະນັກງານຮ້ານ
+}
+
+enum RiderStatus {
+  AVAILABLE // ພ້ອມຮັບງານ
+  BUSY // ກຳລັງສົ່ງສິນຄ້າ
+  OFFLINE // ອອບໄລນ໌
+}
+
+enum OrderStatus {
+  PENDING // ລໍຖ້າຮ້ານຢືນຢັນ
+  CONFIRMED // ຮ້ານຢືນຢັນແລ້ວ
+  PREPARING // ກຳລັງກະກຽມ
+  READY_FOR_PICKUP // ພ້ອມສົ່ງ
+  PICKED_UP // ຜູ້ສົ່ງຮັບແລ້ວ
+  DELIVERING // ກຳລັງຈັດສົ່ງ
+  DELIVERED // ສົ່ງສຳເລັດ
+  CANCELLED // ຍົກເລີກ
+}
+
+enum PaymentMethod {
+  CASH // ເງິນສົດ
+  BANK_TRANSFER // ໂອນເງິນ
+  MOBILE_PAYMENT // ຊຳລະຜ່ານມືຖື
+}
+
+enum PaymentStatus {
+  PENDING // ລໍຖ້າຊຳລະ
+  PAID // ຊຳລະແລ້ວ
+  FAILED // ລົ້ມເຫລວ
+  REFUNDED // ຄືນເງິນແລ້ວ
+}
+
+enum AuthProvider {
+  GOOGLE
+  FACEBOOK
+  APPLE
+  EMAIL
+  PHONE
+}
+
+// ============================================
+// ADMIN & MERCHANT SYSTEM (Web - Admin ດູແລ)
+// ============================================
+
+model Merchant {
+  id        String   @id @default(cuid())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users  User[]
+  stores Store[]
+}
+
+model User {
+  id         String    @id @default(cuid())
+  merchantId String?
+  merchant   Merchant? @relation(fields: [merchantId], references: [id])
+
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  fullName     String?
+  avatar       String?
+  role         UserRole @default(MERCHANT_STAFF)
+  isActive     Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@index([merchantId])
+  @@index([email])
+}
+
+// ============================================
+// RIDER SYSTEM (Mobile App - Admin ເພີ່ມໃຫ້)
+// ============================================
+
+model Rider {
+  id String @id @default(cuid())
+
+  email        String  @unique
+  phone        String  @unique
+  passwordHash String
+  fullName     String
+  avatar       String?
+
+  vehicleType  String?
+  vehiclePlate String?
+
+  status     RiderStatus @default(OFFLINE)
+  isActive   Boolean     @default(true)
+  isVerified Boolean     @default(false)
+
+  currentLat Float?
+  currentLng Float?
+  lastSeenAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deliveries      Delivery[]
+  riderEarnings   RiderEarning[]
+  deviceTokens    DeviceToken[]
+  locationHistory RiderLocationHistory[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model RiderEarning {
+  id      String @id @default(cuid())
+  riderId String
+  rider   Rider  @relation(fields: [riderId], references: [id])
+
+  amount Int
+  type   String
+  note   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([riderId, createdAt])
+}
+
+model RiderLocationHistory {
+  id      String @id @default(cuid())
+  riderId String
+  rider   Rider  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  lat      Float
+  lng      Float
+  accuracy Float?
+  speed    Float?
+
+  createdAt DateTime @default(now())
+
+  @@index([riderId, createdAt])
+}
+
+// ============================================
+// CUSTOMER SYSTEM (Mobile App - Social Login)
+// ============================================
+
+model Customer {
+  id String @id @default(cuid())
+
+  firebaseUid String @unique
+
+  googleId   String? @unique
+  facebookId String? @unique
+  appleId    String? @unique
+
+  email    String?
+  phone    String?
+  fullName String?
+  avatar   String?
+
+  authProvider AuthProvider
+
+  isActive Boolean @default(true)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
+  addresses    CustomerAddress[]
+  orders       Order[]
+  reviews      Review[]
+  favorites    FavoriteStore[]
+  deviceTokens DeviceToken[]
+  carts        Cart[]
+
+  @@index([email])
+  @@index([firebaseUid])
+}
+
+model CustomerAddress {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  label     String
+  address   String
+  lat       Float
+  lng       Float
+  note      String?
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([customerId])
+}
+
+model FavoriteStore {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  storeId    String
+  store      Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([customerId, storeId])
+}
+
+// ============================================
+// STORE & PRODUCT SYSTEM
+// ============================================
+
+model Store {
+  id         String   @id @default(cuid())
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+
+  name        String
+  description String?
+  phone       String?
+  address     String?
+  lat         Float?
+  lng         Float?
+  coverImage  String?
+  logo        String?
+
+  openTime  String?
+  closeTime String?
+
+  minOrderAmount    Int @default(0)
+  deliveryFee       Int @default(0)
+  estimatedPrepTime Int @default(30)
+
+  isActive    Boolean @default(true)
+  rating      Float   @default(0)
+  totalOrders Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categories Category[]
+  products   Product[]
+  orders     Order[]
+  reviews    Review[]
+  favorites  FavoriteStore[]
+  carts      Cart[]
+
+  @@index([merchantId])
+  @@index([lat, lng])
+}
+
+model Category {
+  id      String @id @default(cuid())
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name      String
+  image     String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  products Product[]
+
+  @@unique([storeId, name])
+  @@index([storeId])
+}
+
+model Product {
+  id      String @id @default(cuid())
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  name        String
+  description String?
+  basePrice   Int
+  currency    String  @default("LAK")
+  sku         String?
+  image       String?
+  isAvailable Boolean @default(true)
+
+  totalSold Int @default(0)
+
+  images     ProductImage[]
+  variants   ProductVariant[]
+  stock      StockItem?
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([storeId, sku])
+  @@index([storeId])
+  @@index([categoryId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  url       String
+  sortOrder Int    @default(0)
+
+  @@index([productId])
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  name        String
+  priceDelta  Int     @default(0)
+  isAvailable Boolean @default(true)
+
+  orderItems OrderItemVariant[]
+
+  @@index([productId])
+}
+
+model StockItem {
+  id        String  @id @default(cuid())
+  productId String  @unique
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  quantity      Int      @default(0)
+  lowStockAlert Int      @default(10)
+  updatedAt     DateTime @updatedAt
+
+  movements StockMovement[]
+}
+
+model StockMovement {
+  id          String    @id @default(cuid())
+  stockItemId String
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
+
+  delta     Int
+  reason    String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([stockItemId, createdAt])
+}
+
+// ============================================
+// ORDER SYSTEM
+// ============================================
+
+model Order {
+  id      String @id @default(cuid())
+  orderNo String @unique @default(cuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  addressId String?
+  address   CustomerAddress? @relation(fields: [addressId], references: [id])
+
+  deliveryAddress String
+  deliveryLat     Float
+  deliveryLng     Float
+  deliveryNote    String?
+
+  subtotal    Int
+  deliveryFee Int
+  discount    Int @default(0)
+  total       Int
+
+  status OrderStatus @default(PENDING)
+
+  paymentMethod PaymentMethod @default(CASH)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  confirmedAt  DateTime?
+  preparedAt   DateTime?
+  pickedUpAt   DateTime?
+  deliveredAt  DateTime?
+  cancelledAt  DateTime?
+  cancelReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items    OrderItem[]
+  delivery Delivery?
+  payment  Payment?
+  review   Review?
+
+  @@index([customerId, createdAt])
+  @@index([storeId, createdAt])
+  @@index([status])
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  productName  String
+  productImage String?
+
+  quantity   Int
+  unitPrice  Int
+  totalPrice Int
+  note       String?
+
+  variants OrderItemVariant[]
+
+  @@index([orderId])
+}
+
+model OrderItemVariant {
+  id          String    @id @default(cuid())
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  variantName String
+  priceDelta  Int
+
+  @@index([orderItemId])
+}
+
+// ============================================
+// DELIVERY SYSTEM
+// ============================================
+
+model Delivery {
+  id      String @id @default(cuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  riderId String?
+  rider   Rider?  @relation(fields: [riderId], references: [id])
+
+  assignedAt  DateTime?
+  pickedUpAt  DateTime?
+  deliveredAt DateTime?
+
+  distance      Float?
+  estimatedTime Int?
+
+  currentLat Float?
+  currentLng Float?
+
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([riderId])
+}
+
+// ============================================
+// PAYMENT SYSTEM
+// ============================================
+
+model Payment {
+  id      String @id @default(cuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  method PaymentMethod
+  status PaymentStatus @default(PENDING)
+  amount Int
+
+  transactionId String?
+  paidAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// REVIEW SYSTEM
+// ============================================
+
+model Review {
+  id      String @id @default(cuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
+
+  rating  Int
+  comment String?
+  reply   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([customerId])
+}
+
+// ============================================
+// CART SYSTEM (Mobile App Sync)
+// ============================================
+
+model Cart {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+
+  @@unique([customerId, storeId])
+}
+
+model CartItem {
+  id     String @id @default(cuid())
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId String
+  quantity  Int
+  note      String?
+  variants  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+}
+
+// ============================================
+// MOBILE APP - PUSH NOTIFICATION
+// ============================================
+
+model DeviceToken {
+  id String @id @default(cuid())
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  riderId    String?
+  rider      Rider?    @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  fcmToken   String  @unique
+  platform   String
+  deviceId   String?
+  deviceName String?
+  appVersion String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([riderId])
+}
+
+// ============================================
+// NOTIFICATION SYSTEM
+// ============================================
+
+model Notification {
+  id String @id @default(cuid())
+
+  userId     String?
+  customerId String?
+  riderId    String?
+
+  title String
+  body  String
+  type  String
+  data  Json?
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([customerId, createdAt])
+  @@index([riderId, createdAt])
+}
+
+// ============================================
+// APP CONFIGURATION
+// ============================================
+
+model AppConfig {
+  id String @id @default(cuid())
+
+  key         String  @unique
+  value       String
+  description String?
+
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// AUDIT LOG
+// ============================================
+
+model AuditLog {
+  id      String @id @default(cuid())
+  actorId String
+  actor   User   @relation(fields: [actorId], references: [id])
+
+  action    String
+  entity    String
+  entityId  String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([actorId, createdAt])
+}

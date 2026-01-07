@@ -1,0 +1,377 @@
+// Foodpanda Admin Dashboard - Main Styles
+
+// Variables
+$primary-color: #d70f64;
+$primary-hover: #bf0d59;
+$secondary-color: #ff2b85;
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$text-color: #1f1f1f;
+$text-secondary: #666666;
+$border-color: #e8e8e8;
+$background-color: #f5f5f5;
+
+// Reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: 'Noto Sans Lao', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: $text-color;
+  background-color: $background-color;
+}
+
+// Layout
+.admin-layout {
+  min-height: 100vh;
+  display: flex;
+}
+
+.sidebar {
+  width: 260px;
+  background: #fff;
+  border-right: 1px solid $border-color;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 100;
+  
+  .logo {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid $border-color;
+    
+    img {
+      height: 40px;
+    }
+    
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: $primary-color;
+      margin: 0;
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+}
+
+.header {
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.content {
+  padding: 24px;
+}
+
+// Card
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  padding: 24px;
+  margin-bottom: 24px;
+  
+  &-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border-color;
+    
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+}
+
+// Stats
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 12px;
+    
+    &.primary {
+      background: rgba($primary-color, 0.1);
+      color: $primary-color;
+    }
+    
+    &.success {
+      background: rgba($success-color, 0.1);
+      color: $success-color;
+    }
+    
+    &.warning {
+      background: rgba($warning-color, 0.1);
+      color: $warning-color;
+    }
+    
+    &.info {
+      background: rgba(#1890ff, 0.1);
+      color: #1890ff;
+    }
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: $text-color;
+    line-height: 1.2;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    color: $text-secondary;
+    margin-top: 4px;
+  }
+}
+
+// Table
+.table-wrapper {
+  overflow-x: auto;
+}
+
+// Status Badge
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  
+  &.pending {
+    background: rgba($warning-color, 0.1);
+    color: $warning-color;
+  }
+  
+  &.confirmed {
+    background: rgba(#1890ff, 0.1);
+    color: #1890ff;
+  }
+  
+  &.preparing {
+    background: rgba(#722ed1, 0.1);
+    color: #722ed1;
+  }
+  
+  &.delivering {
+    background: rgba(#13c2c2, 0.1);
+    color: #13c2c2;
+  }
+  
+  &.delivered {
+    background: rgba($success-color, 0.1);
+    color: $success-color;
+  }
+  
+  &.cancelled {
+    background: rgba($error-color, 0.1);
+    color: $error-color;
+  }
+}
+
+// Form
+.form-group {
+  margin-bottom: 16px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  
+  &-primary {
+    background: $primary-color;
+    color: #fff;
+    
+    &:hover {
+      background: $primary-hover;
+    }
+  }
+  
+  &-outline {
+    background: #fff;
+    border: 1px solid $border-color;
+    color: $text-color;
+    
+    &:hover {
+      border-color: $primary-color;
+      color: $primary-color;
+    }
+  }
+}
+
+// Login Page
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+  
+  .login-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+      
+      h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: $primary-color;
+      }
+      
+      p {
+        color: $text-secondary;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Ant Design Overrides
+.ant-btn-primary {
+  background: $primary-color !important;
+  border-color: $primary-color !important;
+  
+  &:hover {
+    background: $primary-hover !important;
+    border-color: $primary-hover !important;
+  }
+}
+
+.ant-menu-item-selected {
+  background-color: rgba($primary-color, 0.1) !important;
+  
+  &::after {
+    border-right-color: $primary-color !important;
+  }
+}
+
+.ant-menu-item-selected a,
+.ant-menu-item-selected .ant-menu-title-content {
+  color: $primary-color !important;
+}
+
+// Page Title
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  
+  .empty-icon {
+    font-size: 64px;
+    color: $border-color;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    font-size: 18px;
+    color: $text-color;
+    margin-bottom: 8px;
+  }
+  
+  p {
+    color: $text-secondary;
+  }
+}
+
