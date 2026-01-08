@@ -4,7 +4,8 @@ import '../../services/api_service.dart';
 import '../models/notification_model.dart';
 
 class NotificationProvider {
-  final ApiService _api = ApiService.to;
+  // Use lazy getter to avoid accessing ApiService before it's registered
+  ApiService get _api => ApiService.to;
 
   /// Get list of notifications with pagination
   Future<NotificationListResponse> getNotifications({
@@ -23,7 +24,8 @@ class NotificationProvider {
       if (response.data['success'] == true) {
         return NotificationListResponse.fromJson(response.data);
       } else {
-        throw Exception(response.data['message'] ?? 'Failed to load notifications');
+        throw Exception(
+            response.data['message'] ?? 'Failed to load notifications');
       }
     } on DioException catch (e) {
       throw _handleError(e);
@@ -110,7 +112,7 @@ class NotificationProvider {
 
   Exception _handleError(DioException e) {
     String message = 'ເກີດຂໍ້ຜິດພາດ';
-    
+
     if (e.response != null) {
       final data = e.response?.data;
       if (data is Map && data['message'] != null) {
@@ -125,4 +127,3 @@ class NotificationProvider {
     return Exception(message);
   }
 }
-
