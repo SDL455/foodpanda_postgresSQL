@@ -55,6 +55,30 @@ enum AuthProvider {
   PHONE
 }
 
+enum NotificationType {
+  // Customer notifications - Order updates
+  ORDER_PLACED // ສັ່ງຊື້ສຳເລັດ
+  ORDER_CONFIRMED // ຮ້ານຢືນຢັນແລ້ວ
+  ORDER_PREPARING // ກຳລັງກະກຽມ
+  ORDER_READY // ພ້ອມສົ່ງ
+  ORDER_PICKED_UP // Rider ຮັບແລ້ວ
+  ORDER_DELIVERING // ກຳລັງຈັດສົ່ງ
+  ORDER_DELIVERED // ສົ່ງສຳເລັດ
+  ORDER_CANCELLED // ຍົກເລີກ
+
+  // Store/Merchant notifications
+  NEW_ORDER // Order ໃໝ່ເຂົ້າມາ
+
+  // Rider notifications
+  NEW_DELIVERY // ມີງານສົ່ງໃໝ່
+  DELIVERY_ASSIGNED // ໄດ້ຮັບມອບໝາຍງານ
+
+  // Marketing & System
+  PROMOTION // ໂປຣໂມຊັ່ນ
+  CHAT_MESSAGE // ຂໍ້ຄວາມ Chat
+  SYSTEM // ແຈ້ງເຕືອນລະບົບ
+}
+
 // ============================================
 // ADMIN & MERCHANT SYSTEM (Web - Admin ດູແລ)
 // ============================================
@@ -86,7 +110,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  auditLogs AuditLog[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
 
   @@index([merchantId])
   @@index([email])
@@ -123,6 +148,7 @@ model Rider {
   riderEarnings   RiderEarning[]
   deviceTokens    DeviceToken[]
   locationHistory RiderLocationHistory[]
+  notifications   Notification[]
 
   @@index([email])
   @@index([phone])
@@ -183,12 +209,13 @@ model Customer {
   updatedAt   DateTime  @updatedAt
   lastLoginAt DateTime?
 
-  addresses    CustomerAddress[]
-  orders       Order[]
-  reviews      Review[]
-  favorites    FavoriteStore[]
-  deviceTokens DeviceToken[]
-  carts        Cart[]
+  addresses     CustomerAddress[]
+  orders        Order[]
+  reviews       Review[]
+  favorites     FavoriteStore[]
+  deviceTokens  DeviceToken[]
+  carts         Cart[]
+  notifications Notification[]
 
   @@index([email])
   @@index([firebaseUid])
@@ -598,23 +625,41 @@ model DeviceToken {
 model Notification {
   id String @id @default(cuid())
 
+  // ຜູ້ຮັບ notification (ເລືອກອັນໃດອັນໜຶ່ງ)
   userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
   riderId    String?
+  rider      Rider?    @relation(fields: [riderId], references: [id], onDelete: Cascade)
 
+  // ເນື້ອໃນ notification
+  type  NotificationType
   title String
   body  String
-  type  String
+  image String?
   data  Json?
 
+  // Reference (optional)
+  orderId String?
+
+  // ສະຖານະ
   isRead Boolean   @default(false)
   readAt DateTime?
+
+  // FCM Status
+  isSent   Boolean   @default(false)
+  sentAt   DateTime?
+  fcmError String?
 
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
   @@index([customerId, createdAt])
   @@index([riderId, createdAt])
+  @@index([orderId])
+  @@index([isRead])
+  @@index([type])
 }
 
 // ============================================

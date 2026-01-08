@@ -1,11 +1,21 @@
 import { z } from 'zod'
 import prisma from '../../../utils/prisma'
 import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse, notFoundResponse } from '../../../utils/response'
+import { notifyCustomerOrderStatus } from '../../../services/notification'
+import type { NotificationType } from '@prisma/client'
 
 const updateStatusSchema = z.object({
   status: z.enum(['CONFIRMED', 'PREPARING', 'READY_FOR_PICKUP', 'CANCELLED']),
   cancelReason: z.string().optional(),
 })
+
+// Map order status to notification type
+const statusToNotificationType: Record<string, NotificationType> = {
+  CONFIRMED: 'ORDER_CONFIRMED',
+  PREPARING: 'ORDER_PREPARING',
+  READY_FOR_PICKUP: 'ORDER_READY',
+  CANCELLED: 'ORDER_CANCELLED',
+}
 
 export default defineEventHandler(async (event) => {
   const user = event.context.user
@@ -86,8 +96,18 @@ export default defineEventHandler(async (event) => {
     },
   })
   
-  // TODO: Send notification to customer
+  // Send notification to customer
+  try {
+    const notificationType = statusToNotificationType[status]
+    if (notificationType) {
+      await notifyCustomerOrderStatus(id, notificationType, {
+        reason: cancelReason,
+      })
+    }
+  } catch (error) {
+    console.error('Failed to send notification:', error)
+    // Don't fail the request if notification fails
+  }
   
   return successResponse(updated, 'ອັບເດດສະຖານະສຳເລັດ')
 })
-
