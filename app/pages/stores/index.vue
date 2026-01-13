@@ -20,7 +20,7 @@
                     <a-card hoverable @click="$router.push(`/stores/${store.id}`)">
                         <template #cover>
                             <div class="store-cover"
-                                :style="{ backgroundImage: `url(${store.coverImage || '/images/store-placeholder.jpg'})` }">
+                                :style="{ backgroundImage: store.coverImage ? `url(${store.coverImage})` : 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' }">
                                 <a-tag v-if="!store.isActive" color="red"
                                     style="position: absolute; top: 10px; right: 10px;">
                                     ປິດ

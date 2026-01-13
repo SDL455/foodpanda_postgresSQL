@@ -5,10 +5,10 @@
         </div>
 
         <!-- Select Store First -->
-        <div class="card" style="margin-bottom: 16px;">
+        <div class="card" style="margin-bottom: 16px">
             <a-space>
                 <span>ເລືອກຮ້ານ:</span>
-                <a-select v-model:value="selectedStoreId" style="width: 250px;" placeholder="ເລືອກຮ້ານ"
+                <a-select v-model:value="selectedStoreId" style="width: 250px" placeholder="ເລືອກຮ້ານ"
                     @change="fetchProducts">
                     <a-select-option v-for="store in stores" :key="store.id" :value="store.id">
                         {{ store.name }}
@@ -32,8 +32,8 @@
                             </a-avatar>
                             <div>
                                 <div>{{ record.name }}</div>
-                                <div style="font-size: 12px; color: #666;">
-                                    {{ record.category?.name || 'ບໍ່ມີໝວດໝູ່' }}
+                                <div style="font-size: 12px; color: #666">
+                                    {{ record.category?.name || "ບໍ່ມີໝວດໝູ່" }}
                                 </div>
                             </div>
                         </a-space>
@@ -98,7 +98,7 @@
                 <a-row :gutter="16">
                     <a-col :span="12">
                         <a-form-item label="ລາຄາ (ກີບ)" required>
-                            <a-input-number v-model:value="productForm.basePrice" :min="0" style="width: 100%;" />
+                            <a-input-number v-model:value="productForm.basePrice" :min="0" style="width: 100%" />
                         </a-form-item>
                     </a-col>
                     <a-col :span="12">
@@ -116,166 +116,179 @@
 </template>
 
 <script setup lang="ts">
-import { PlusOutlined, EditOutlined, DeleteOutlined, ShopOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
+import {
+    PlusOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    ShopOutlined,
+} from "@ant-design/icons-vue";
+import { message } from "ant-design-vue";
 
 definePageMeta({
-    middleware: 'auth',
-})
+    middleware: "auth",
+});
 
-const api = useApi()
+const api = useApi();
 
-const loading = ref(false)
-const saving = ref(false)
-const stores = ref<any[]>([])
-const selectedStoreId = ref<string | null>(null)
-const products = ref<any[]>([])
-const categories = ref<any[]>([])
+const loading = ref(false);
+const saving = ref(false);
+const stores = ref<any[]>([]);
+const selectedStoreId = ref<string | null>(null);
+const products = ref<any[]>([]);
+const categories = ref<any[]>([]);
 const pagination = ref({
     current: 1,
     pageSize: 10,
     total: 0,
-})
+});
 
-const showCreateModal = ref(false)
-const editingProduct = ref<any>(null)
+const showCreateModal = ref(false);
+const editingProduct = ref<any>(null);
 
 const productForm = reactive({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     basePrice: 0,
     categoryId: undefined as string | undefined,
-    sku: '',
-    image: '',
-})
+    sku: "",
+    image: "",
+});
 
 const columns = [
-    { title: 'ສິນຄ້າ', key: 'name' },
-    { title: 'ລາຄາ', key: 'price', width: 120 },
-    { title: 'ສາງ', key: 'stock', width: 80 },
-    { title: 'ສະຖານະ', key: 'status', width: 100 },
-    { title: 'ການກະທຳ', key: 'actions', width: 120 },
-]
+    { title: "ສິນຄ້າ", key: "name" },
+    { title: "ລາຄາ", key: "price", width: 120 },
+    { title: "ສາງ", key: "stock", width: 80 },
+    { title: "ສະຖານະ", key: "status", width: 100 },
+    { title: "ການກະທຳ", key: "actions", width: 120 },
+];
 
 const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('lo-LA', {
-        style: 'currency',
-        currency: 'LAK',
+    return new Intl.NumberFormat("lo-LA", {
+        style: "currency",
+        currency: "LAK",
         minimumFractionDigits: 0,
-    }).format(amount)
-}
+    }).format(amount);
+};
 
 const fetchStores = async () => {
     try {
-        const result = await api.get<any>('/api/stores')
-        stores.value = result.data.stores
+        const result = await api.get<any>("/api/stores");
+        stores.value = result.data.stores;
         if (stores.value.length > 0) {
-            selectedStoreId.value = stores.value[0].id
-            fetchProducts()
-            fetchCategories()
+            selectedStoreId.value = stores.value[0].id;
+            fetchProducts();
+            fetchCategories();
         }
     } catch (error) {
-        message.error('ບໍ່ສາມາດໂຫຼດຂໍ້ມູນໄດ້')
+        message.error("ບໍ່ສາມາດໂຫຼດຂໍ້ມູນໄດ້");
     }
-}
+};
 
 const fetchProducts = async () => {
-    if (!selectedStoreId.value) return
+    if (!selectedStoreId.value) return;
 
-    loading.value = true
+    loading.value = true;
     try {
-        const result = await api.get<any>(`/api/stores/${selectedStoreId.value}/products`, {
-            page: pagination.value.current,
-            limit: pagination.value.pageSize,
-        })
-        products.value = result.data.products
-        pagination.value.total = result.data.pagination.total
-        fetchCategories()
+        const result = await api.get<any>(
+            `/api/stores/${selectedStoreId.value}/products`,
+            {
+                page: pagination.value.current,
+                limit: pagination.value.pageSize,
+            }
+        );
+        products.value = result.data.products;
+        pagination.value.total = result.data.pagination.total;
+        fetchCategories();
     } catch (error) {
-        message.error('ບໍ່ສາມາດໂຫຼດຂໍ້ມູນໄດ້')
+        message.error("ບໍ່ສາມາດໂຫຼດຂໍ້ມູນໄດ້");
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 const fetchCategories = async () => {
-    if (!selectedStoreId.value) return
+    if (!selectedStoreId.value) return;
 
     try {
-        const result = await api.get<any>(`/api/stores/${selectedStoreId.value}/categories`)
-        categories.value = result.data
+        const result = await api.get<any>(
+            `/api/stores/${selectedStoreId.value}/categories`
+        );
+        categories.value = result.data;
     } catch (error) {
-        console.error('Failed to fetch categories')
+        console.error("Failed to fetch categories");
     }
-}
+};
 
 const handleTableChange = (pag: any) => {
-    pagination.value.current = pag.current
-    pagination.value.pageSize = pag.pageSize
-    fetchProducts()
-}
+    pagination.value.current = pag.current;
+    pagination.value.pageSize = pag.pageSize;
+    fetchProducts();
+};
 
 const resetForm = () => {
-    editingProduct.value = null
+    editingProduct.value = null;
     Object.assign(productForm, {
-        name: '',
-        description: '',
+        name: "",
+        description: "",
         basePrice: 0,
         categoryId: undefined,
-        sku: '',
-        image: '',
-    })
-}
+        sku: "",
+        image: "",
+    });
+};
 
 const editProduct = (product: any) => {
-    editingProduct.value = product
+    editingProduct.value = product;
     Object.assign(productForm, {
         name: product.name,
-        description: product.description || '',
+        description: product.description || "",
         basePrice: product.basePrice,
         categoryId: product.categoryId,
-        sku: product.sku || '',
-        image: product.image || '',
-    })
-    showCreateModal.value = true
-}
+        sku: product.sku || "",
+        image: product.image || "",
+    });
+    showCreateModal.value = true;
+};
 
 const handleSave = async () => {
     if (!productForm.name || !productForm.basePrice) {
-        message.error('ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບ')
-        return
+        message.error("ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບ");
+        return;
     }
 
-    saving.value = true
+    saving.value = true;
     try {
         if (editingProduct.value) {
             // Update - would need PATCH endpoint
-            message.info('ຟັງຊັ່ນອັບເດດຍັງບໍ່ພ້ອມ')
+            message.info("ຟັງຊັ່ນອັບເດດຍັງບໍ່ພ້ອມ");
         } else {
-            await api.post(`/api/stores/${selectedStoreId.value}/products`, productForm)
-            message.success('ສ້າງສິນຄ້າສຳເລັດ')
+            await api.post(
+                `/api/stores/${selectedStoreId.value}/products`,
+                productForm
+            );
+            message.success("ສ້າງສິນຄ້າສຳເລັດ");
         }
-        showCreateModal.value = false
-        resetForm()
-        fetchProducts()
+        showCreateModal.value = false;
+        resetForm();
+        fetchProducts();
     } catch (error: any) {
-        message.error(error.data?.message || 'ເກີດຂໍ້ຜິດພາດ')
+        message.error(error.data?.message || "ເກີດຂໍ້ຜິດພາດ");
     } finally {
-        saving.value = false
+        saving.value = false;
     }
-}
+};
 
 const toggleAvailable = async (product: any, checked: boolean) => {
     // Would need PATCH endpoint
-    message.info('ຟັງຊັ່ນນີ້ຍັງບໍ່ພ້ອມ')
-}
+    message.info("ຟັງຊັ່ນນີ້ຍັງບໍ່ພ້ອມ");
+};
 
 const deleteProduct = async (product: any) => {
     // Would need DELETE endpoint
-    message.info('ຟັງຊັ່ນລຶບຍັງບໍ່ພ້ອມ')
-}
+    message.info("ຟັງຊັ່ນລຶບຍັງບໍ່ພ້ອມ");
+};
 
 onMounted(() => {
-    fetchStores()
-})
+    fetchStores();
+});
 </script>
