@@ -1,32 +1,50 @@
-import prisma from '../../../utils/prisma'
-import { successResponse, unauthorizedResponse, forbiddenResponse } from '../../../utils/response'
+import prisma from "../../../utils/prisma";
+import {
+  successResponse,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from "../../../utils/response";
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.user
-  
+  const user = event.context.user;
+
   if (!user) {
-    return unauthorizedResponse()
+    return unauthorizedResponse();
   }
-  
-  if (user.role !== 'SUPER_ADMIN') {
-    return forbiddenResponse('ບໍ່ມີສິດເຂົ້າເຖິງ')
+
+  if (user.role !== "SUPER_ADMIN") {
+    return forbiddenResponse("ບໍ່ມີສິດເຂົ້າເຖິງ");
   }
-  
-  const query = getQuery(event)
-  const page = parseInt(query.page as string) || 1
-  const limit = parseInt(query.limit as string) || 10
-  const search = query.search as string || ''
-  
-  const where = search ? {
-    name: { contains: search, mode: 'insensitive' as const },
-  } : {}
-  
+
+  const query = getQuery(event);
+  const page = parseInt(query.page as string) || 1;
+  const limit = parseInt(query.limit as string) || 10;
+  const search = (query.search as string) || "";
+
+  const where = search
+    ? {
+        name: { contains: search, mode: "insensitive" as const },
+      }
+    : {};
+
   const [merchants, total] = await Promise.all([
     prisma.merchant.findMany({
       where,
       include: {
         stores: {
-          select: { id: true, name: true },
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            address: true,
+            logo: true,
+            isActive: true,
+            description: true,
+            _count: {
+              select: { products: true, orders: true },
+            },
+          },
+          orderBy: { createdAt: "desc" },
         },
         users: {
           select: { id: true, email: true, fullName: true, role: true },
@@ -35,13 +53,13 @@ export default defineEventHandler(async (event) => {
           select: { stores: true, users: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
     }),
     prisma.merchant.count({ where }),
-  ])
-  
+  ]);
+
   return successResponse({
     merchants,
     pagination: {
@@ -50,6 +68,5 @@ export default defineEventHandler(async (event) => {
       total,
       totalPages: Math.ceil(total / limit),
     },
-  })
-})
-
+  });
+});
