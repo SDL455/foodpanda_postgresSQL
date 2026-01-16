@@ -8,6 +8,7 @@ class StorageService {
   static const String _keyRefreshToken = 'refresh_token';
   static const String _keyUser = 'user_data';
   static const String _keyIsLoggedIn = 'is_logged_in';
+  static const String _keyUserType = 'user_type'; // 'customer' or 'rider'
   static const String _keyLanguage = 'language';
   static const String _keyThemeMode = 'theme_mode';
   static const String _keyFcmToken = 'fcm_token';
@@ -50,6 +51,14 @@ class StorageService {
     await _box.write(_keyIsLoggedIn, value);
   }
 
+  // User Type (customer or rider)
+  static String get userType => _box.read(_keyUserType) ?? 'customer';
+  static bool get isRider => userType == 'rider';
+  static bool get isCustomer => userType == 'customer';
+  static Future<void> setUserType(String type) async {
+    await _box.write(_keyUserType, type);
+  }
+
   // Language
   static String get language => _box.read(_keyLanguage) ?? 'lo';
   static Future<void> setLanguage(String lang) async {
@@ -69,7 +78,8 @@ class StorageService {
   }
 
   // Selected Address
-  static Map<String, dynamic>? get selectedAddress => _box.read(_keySelectedAddress);
+  static Map<String, dynamic>? get selectedAddress =>
+      _box.read(_keySelectedAddress);
   static Future<void> setSelectedAddress(Map<String, dynamic> address) async {
     await _box.write(_keySelectedAddress, address);
   }
@@ -84,5 +94,6 @@ class StorageService {
     await removeToken();
     await removeUserData();
     await setIsLoggedIn(false);
+    await _box.remove(_keyUserType);
   }
 }

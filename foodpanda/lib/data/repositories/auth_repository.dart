@@ -88,6 +88,31 @@ class AuthRepository {
     return user;
   }
 
+  // Rider Login
+  Future<void> riderLogin({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _authProvider.riderLogin(
+      email: email,
+      password: password,
+    );
+
+    // Response format: { success: true, data: { token, rider }, message }
+    final data = response['data'] ?? response;
+
+    // Save tokens
+    if (data['token'] != null) {
+      await StorageService.setToken(data['token']);
+    }
+
+    // Save rider data
+    if (data['rider'] != null) {
+      await StorageService.setUserData(data['rider']);
+    }
+    await StorageService.setIsLoggedIn(true);
+  }
+
   Future<void> logout() async {
     try {
       await _authProvider.logout();

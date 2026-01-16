@@ -4,6 +4,7 @@ import '../../../data/repositories/auth_repository.dart';
 import '../../../data/models/user_model.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../core/utils/logger_service.dart';
+import '../../../core/utils/storage_service.dart';
 import '../../../routes/app_routes.dart';
 
 class AuthController extends GetxController {
@@ -22,9 +23,17 @@ class AuthController extends GetxController {
   final RxBool obscureConfirmPassword = true.obs;
   final Rxn<UserModel> currentUser = Rxn<UserModel>();
 
+  // User type selection (customer or rider)
+  final RxBool isRiderLogin = false.obs;
+
   // Form keys
   final loginFormKey = GlobalKey<FormState>();
   final registerFormKey = GlobalKey<FormState>();
+
+  // Toggle between customer and rider login
+  void toggleUserType() {
+    isRiderLogin.value = !isRiderLogin.value;
+  }
 
   @override
   void onInit() {
@@ -58,14 +67,26 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      final user = await _authRepository.login(
-        email: emailController.text.trim(),
-        password: passwordController.text,
-      );
-
-      currentUser.value = user;
-      _clearForm();
-      Get.offAllNamed(AppRoutes.main);
+      if (isRiderLogin.value) {
+        // Rider Login
+        await _authRepository.riderLogin(
+          email: emailController.text.trim(),
+          password: passwordController.text,
+        );
+        await StorageService.setUserType('rider');
+        _clearForm();
+        Get.offAllNamed(AppRoutes.riderMain);
+      } else {
+        // Customer Login
+        final user = await _authRepository.login(
+          email: emailController.text.trim(),
+          password: passwordController.text,
+        );
+        await StorageService.setUserType('customer');
+        currentUser.value = user;
+        _clearForm();
+        Get.offAllNamed(AppRoutes.main);
+      }
     } catch (e) {
       LoggerService.error('Login error', e);
       Helpers.showSnackbar(
@@ -103,6 +124,7 @@ class AuthController extends GetxController {
             : null,
       );
 
+      await StorageService.setUserType('customer');
       currentUser.value = user;
       _clearForm();
       Get.offAllNamed(AppRoutes.main);

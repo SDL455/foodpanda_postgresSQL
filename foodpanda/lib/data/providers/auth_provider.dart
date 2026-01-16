@@ -54,6 +54,22 @@ class AuthProvider {
     }
   }
 
+  // Rider Login
+  Future<Map<String, dynamic>> riderLogin({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.riderLogin,
+        data: {'email': email, 'password': password},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
   Future<void> logout() async {
     try {
       await _apiClient.post(ApiConstants.logout);

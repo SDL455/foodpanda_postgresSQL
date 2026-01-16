@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foodpanda/modules/auth/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 
 import 'core/theme/app_theme.dart';
@@ -8,23 +9,22 @@ import 'core/utils/storage_service.dart';
 import 'core/network/api_client.dart';
 import 'routes/app_routes.dart';
 import 'routes/app_pages.dart';
-import 'modules/auth/controllers/auth_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize storage
   await StorageService.init();
-  
+
   // Initialize API client
   ApiClient().init();
-  
+
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -33,7 +33,7 @@ void main() async {
       statusBarBrightness: Brightness.light,
     ),
   );
-  
+
   runApp(const FoodPandaApp());
 }
 
@@ -50,25 +50,25 @@ class FoodPandaApp extends StatelessWidget {
         return GetMaterialApp(
           title: 'FoodPanda',
           debugShowCheckedModeBanner: false,
-          
+
           // Theme
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
-          
+
           // Localization
           locale: const Locale('lo', 'LA'),
           fallbackLocale: const Locale('en', 'US'),
-          
+
           // Routes
           initialRoute: AppRoutes.splash,
           getPages: AppPages.pages,
-          
+
           // Global bindings
           initialBinding: BindingsBuilder(() {
             Get.put(AuthController(), permanent: true);
           }),
-          
+
           // Default transition
           defaultTransition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),

@@ -24,11 +24,18 @@ class SplashController extends GetxController {
 
     debugPrint('>>> Delay finished, checking login status...');
     debugPrint('>>> isLoggedIn = ${StorageService.isLoggedIn}');
+    debugPrint('>>> userType = ${StorageService.userType}');
 
     try {
       if (StorageService.isLoggedIn) {
-        debugPrint('>>> Navigating to main');
+        // ກວດເບິ່ງປະເພດຜູ້ໃຊ້ ແລ້ວນຳທາງໄປໜ້າທີ່ຖືກຕ້ອງ
+        if (StorageService.isRider) {
+          debugPrint('>>> Navigating to rider main');
+          Get.offAllNamed(AppRoutes.riderMain);
+        } else {
+          debugPrint('>>> Navigating to customer main');
         Get.offAllNamed(AppRoutes.main);
+        }
       } else {
         debugPrint('>>> Navigating to login');
         Get.offAllNamed(AppRoutes.login);

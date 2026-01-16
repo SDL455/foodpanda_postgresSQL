@@ -23,27 +23,34 @@ class LoginView extends GetView<AuthController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 60.h),
+                SizedBox(height: 40.h),
+                // User Type Toggle
+                _buildUserTypeToggle(),
+                SizedBox(height: 30.h),
                 // Logo
                 _buildLogo(),
-                SizedBox(height: 40.h),
+                SizedBox(height: 30.h),
                 // Welcome text
-                Text(
-                  'ຍິນດີຕ້ອນຮັບກັບຄືນ!',
+                Obx(() => Text(
+                      controller.isRiderLogin.value
+                          ? 'ຍິນດີຕ້ອນຮັບ Rider!'
+                          : 'ຍິນດີຕ້ອນຮັບກັບຄືນ!',
                   style: TextStyle(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
-                ),
+                    )),
                 SizedBox(height: 8.h),
-                Text(
-                  'ເຂົ້າສູ່ລະບົບເພື່ອສັ່ງອາຫານ',
+                Obx(() => Text(
+                      controller.isRiderLogin.value
+                          ? 'ເຂົ້າສູ່ລະບົບເພື່ອຮັບງານສົ່ງ'
+                          : 'ເຂົ້າສູ່ລະບົບເພື່ອສັ່ງອາຫານ',
                   style: TextStyle(
                     fontSize: 16.sp,
                     color: AppColors.textSecondary,
                   ),
-                ),
+                    )),
                 SizedBox(height: 32.h),
                 // Email field
                 CustomTextField(
@@ -95,23 +102,27 @@ class LoginView extends GetView<AuthController> {
                   ),
                 ),
                 SizedBox(height: 24.h),
-                // Divider
+                // Divider and Google sign in (only for customer)
+                Obx(() => controller.isRiderLogin.value
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
                 _buildDivider(),
                 SizedBox(height: 24.h),
-                // Google sign in
-                Obx(
-                  () => CustomButton(
+                          CustomButton(
                     text: AppStrings.continueWithGoogle,
-                    // onPressed: controller.googleSignIn,
                     onPressed: () {},
                     isLoading: controller.isLoading.value,
                     isOutlined: true,
                     icon: _buildGoogleIcon(),
                   ),
-                ),
+                        ],
+                      )),
                 SizedBox(height: 32.h),
-                // Register link
-                Row(
+                // Register link (only for customer)
+                Obx(() => controller.isRiderLogin.value
+                    ? const SizedBox.shrink()
+                    : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
@@ -133,11 +144,96 @@ class LoginView extends GetView<AuthController> {
                       ),
                     ),
                   ],
-                ),
+                      )),
                 SizedBox(height: 24.h),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserTypeToggle() {
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Obx(() => Row(
+            children: [
+              Expanded(
+                child: _buildToggleOption(
+                  icon: Icons.person_outline,
+                  label: 'ລູກຄ້າ',
+                  isSelected: !controller.isRiderLogin.value,
+                  onTap: () {
+                    if (controller.isRiderLogin.value) {
+                      controller.toggleUserType();
+                    }
+                  },
+                ),
+              ),
+              Expanded(
+                child: _buildToggleOption(
+                  icon: Icons.delivery_dining,
+                  label: 'Rider',
+                  isSelected: controller.isRiderLogin.value,
+                  onTap: () {
+                    if (!controller.isRiderLogin.value) {
+                      controller.toggleUserType();
+                    }
+                  },
+                ),
+              ),
+            ],
+          )),
+    );
+  }
+
+  Widget _buildToggleOption({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(vertical: 14.h),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.white : AppColors.grey600,
+              size: 22.sp,
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? AppColors.white : AppColors.grey600,
+              ),
+            ),
+          ],
         ),
       ),
     );

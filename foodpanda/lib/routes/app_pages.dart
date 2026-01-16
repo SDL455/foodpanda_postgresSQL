@@ -1,14 +1,6 @@
 import 'package:get/get.dart';
 import 'app_routes.dart';
 
-// Modules
-import '../modules/splash/splash.dart';
-import '../modules/auth/auth.dart';
-import '../modules/main/main_module.dart';
-import '../modules/cart/cart.dart';
-import '../modules/order/order.dart';
-import '../modules/profile/profile.dart';
-
 class AppPages {
   static final pages = [
     // Splash
@@ -30,7 +22,7 @@ class AppPages {
       binding: AuthBinding(),
     ),
 
-    // Main (with bottom navigation)
+    // Customer Main (with bottom navigation)
     GetPage(
       name: AppRoutes.main,
       page: () => const MainView(),
@@ -56,6 +48,13 @@ class AppPages {
       name: AppRoutes.profile,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
+    ),
+
+    // Rider Main
+    GetPage(
+      name: AppRoutes.riderMain,
+      page: () => const RiderMainView(),
+      binding: RiderBinding(),
     ),
   ];
 }

@@ -31,6 +31,10 @@ class ApiConstants {
   static const String resetPassword = '/auth/reset-password';
   static const String googleAuth = '/auth/google';
 
+  // Rider Auth Endpoints
+  static const String riderLogin = '/auth/rider/login';
+  static const String riderProfile = '/rider/profile';
+
   // User Endpoints
   static const String profile = '/users/profile';
   static const String updateProfile = '/users/profile';
