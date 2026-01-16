@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foodpanda/pages/rider/widgets/logout_dialog.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/rider_controller.dart';
-import '../widgets/widgets.dart';
+import '../widgets/menu_section.dart';
+import '../widgets/profile_header.dart';
+import '../widgets/profile_stats_card.dart';
 
 class RiderProfileView extends GetView<RiderController> {
   const RiderProfileView({super.key});
@@ -142,11 +145,7 @@ class RiderProfileView extends GetView<RiderController> {
       width: double.infinity,
       child: OutlinedButton.icon(
         onPressed: () => showLogoutDialog(context, controller),
-        icon: Icon(
-          Icons.logout,
-          color: AppColors.error,
-          size: 20.sp,
-        ),
+        icon: Icon(Icons.logout, color: AppColors.error, size: 20.sp),
         label: Text(
           'ອອກຈາກລະບົບ',
           style: TextStyle(

@@ -3,7 +3,11 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/rider_controller.dart';
 import '../controllers/rider_delivery_controller.dart';
-import '../widgets/widgets.dart';
+import '../widgets/rider_app_bar.dart';
+import '../widgets/online_toggle_card.dart';
+import '../widgets/rider_stats_cards.dart';
+import '../widgets/delivery_tab_bar.dart';
+import '../widgets/delivery_list.dart';
 
 class RiderHomeView extends GetView<RiderController> {
   const RiderHomeView({super.key});
@@ -25,14 +29,10 @@ class RiderHomeView extends GetView<RiderController> {
             RiderAppBar(controller: controller),
 
             // Online Status Toggle
-            SliverToBoxAdapter(
-              child: OnlineToggleCard(controller: controller),
-            ),
+            SliverToBoxAdapter(child: OnlineToggleCard(controller: controller)),
 
             // Stats Cards
-            SliverToBoxAdapter(
-              child: RiderStatsCards(controller: controller),
-            ),
+            SliverToBoxAdapter(child: RiderStatsCards(controller: controller)),
 
             // Tab Bar
             SliverToBoxAdapter(

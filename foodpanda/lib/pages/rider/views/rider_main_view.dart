@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/rider_controller.dart';
 import '../controllers/rider_delivery_controller.dart';
-import '../widgets/widgets.dart';
+import '../widgets/rider_bottom_nav.dart';
 import 'rider_home_view.dart';
 import 'rider_earnings_view.dart';
 import 'rider_profile_view.dart';

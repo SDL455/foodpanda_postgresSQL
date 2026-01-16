@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foodpanda/pages/rider/widgets/delivery_bottom_actions.dart';
+import 'package:foodpanda/pages/rider/widgets/delivery_status_progress.dart';
+import 'package:foodpanda/pages/rider/widgets/location_card.dart';
+import 'package:foodpanda/pages/rider/widgets/order_details_card.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/rider_delivery_controller.dart';
-import '../widgets/widgets.dart';
 
 class RiderDeliveryDetailView extends StatelessWidget {
   final DeliveryItem delivery;

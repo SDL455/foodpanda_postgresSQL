@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/rider_controller.dart';
-import '../widgets/widgets.dart';
+import '../widgets/earnings_summary_card.dart';
+import '../widgets/period_selector.dart';
+import '../widgets/earnings_chart.dart';
+import '../widgets/transaction_history.dart';
 
 class RiderEarningsView extends GetView<RiderController> {
   const RiderEarningsView({super.key});
