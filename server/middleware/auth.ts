@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
   // Skip auth for public routes
   const publicPaths = [
     "/api/auth/login",
+    "/api/auth/register",
     "/api/auth/rider/login",
     "/api/mobile/auth",
     "/api/mobile/stores",

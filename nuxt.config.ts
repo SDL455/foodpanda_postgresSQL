@@ -3,6 +3,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  // Allow connections from any IP (for mobile app development)
+  devServer: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
+
   modules: [
     '@pinia/nuxt',
     '@nuxt/icon',

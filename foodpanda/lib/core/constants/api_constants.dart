@@ -1,8 +1,26 @@
+import 'dart:io';
+
 class ApiConstants {
   ApiConstants._();
 
-  // Base URL
-  static const String baseUrl = 'http://localhost:3000/api';
+  // Base URL - ປ່ຽນເປັນ IP ຂອງ computer ທ່ານ ຖ້າໃຊ້ device ຈິງ
+  // ສຳລັບ Android Emulator: ໃຊ້ 10.0.2.2 ແທນ localhost
+  // ສຳລັບ iOS Simulator: ໃຊ້ localhost
+  // ສຳລັບ Device ຈິງ: ໃຊ້ IP address ຂອງ computer (ຕົວຢ່າງ: 192.168.1.100)
+  static String get baseUrl {
+    // ກວດເບິ່ງວ່າແມ່ນ Android ບໍ່
+    if (Platform.isAndroid) {
+      // ສຳລັບ Android Emulator ໃຊ້ 10.0.2.2
+      // ຖ້າໃຊ້ device ຈິງ, ປ່ຽນເປັນ IP ຂອງ computer ທ່ານ
+      return 'http://10.0.2.2:3000/api';
+    } else if (Platform.isIOS) {
+      // ສຳລັບ iOS Simulator ໃຊ້ localhost
+      return 'http://localhost:3000/api';
+    } else {
+      // Desktop/Web
+      return 'http://localhost:3000/api';
+    }
+  }
 
   // Auth Endpoints
   static const String login = '/auth/login';

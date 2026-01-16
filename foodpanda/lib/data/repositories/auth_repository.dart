@@ -14,16 +14,19 @@ class AuthRepository {
       password: password,
     );
 
+    // Response format: { success: true, data: { token, user }, message }
+    final data = response['data'] ?? response;
+
     // Save tokens
-    if (response['token'] != null) {
-      await StorageService.setToken(response['token']);
+    if (data['token'] != null) {
+      await StorageService.setToken(data['token']);
     }
-    if (response['refresh_token'] != null) {
-      await StorageService.setRefreshToken(response['refresh_token']);
+    if (data['refresh_token'] != null) {
+      await StorageService.setRefreshToken(data['refresh_token']);
     }
 
     // Save user data
-    final user = UserModel.fromJson(response['user']);
+    final user = UserModel.fromJson(data['user']);
     await StorageService.setUserData(user.toJson());
     await StorageService.setIsLoggedIn(true);
 
@@ -43,16 +46,19 @@ class AuthRepository {
       phone: phone,
     );
 
+    // Response format: { success: true, data: { token, user }, message }
+    final data = response['data'] ?? response;
+
     // Save tokens
-    if (response['token'] != null) {
-      await StorageService.setToken(response['token']);
+    if (data['token'] != null) {
+      await StorageService.setToken(data['token']);
     }
-    if (response['refresh_token'] != null) {
-      await StorageService.setRefreshToken(response['refresh_token']);
+    if (data['refresh_token'] != null) {
+      await StorageService.setRefreshToken(data['refresh_token']);
     }
 
     // Save user data
-    final user = UserModel.fromJson(response['user']);
+    final user = UserModel.fromJson(data['user']);
     await StorageService.setUserData(user.toJson());
     await StorageService.setIsLoggedIn(true);
 
@@ -62,16 +68,20 @@ class AuthRepository {
   Future<UserModel> googleSignIn({required String idToken}) async {
     final response = await _authProvider.googleSignIn(idToken: idToken);
 
+    // Response format: { success: true, data: { token, user/customer }, message }
+    final data = response['data'] ?? response;
+
     // Save tokens
-    if (response['token'] != null) {
-      await StorageService.setToken(response['token']);
+    if (data['token'] != null) {
+      await StorageService.setToken(data['token']);
     }
-    if (response['refresh_token'] != null) {
-      await StorageService.setRefreshToken(response['refresh_token']);
+    if (data['refresh_token'] != null) {
+      await StorageService.setRefreshToken(data['refresh_token']);
     }
 
-    // Save user data
-    final user = UserModel.fromJson(response['user']);
+    // Save user data (can be 'user' or 'customer')
+    final userData = data['user'] ?? data['customer'];
+    final user = UserModel.fromJson(userData);
     await StorageService.setUserData(user.toJson());
     await StorageService.setIsLoggedIn(true);
 

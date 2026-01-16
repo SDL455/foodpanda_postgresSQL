@@ -13,10 +13,7 @@ class AuthProvider {
     try {
       final response = await _apiClient.post(
         ApiConstants.login,
-        data: {
-          'email': email,
-          'password': password,
-        },
+        data: {'email': email, 'password': password},
       );
       return response.data;
     } on DioException catch (e) {
@@ -31,30 +28,25 @@ class AuthProvider {
     String? phone,
   }) async {
     try {
-      final response = await _apiClient.post(
-        ApiConstants.register,
-        data: {
-          'email': email,
-          'password': password,
-          'name': name,
-          'phone': phone,
-        },
-      );
+      final data = {'email': email, 'password': password, 'name': name};
+
+      // ເພີ່ມ phone ຖ້າມີຄ່າ
+      if (phone != null && phone.isNotEmpty) {
+        data['phone'] = phone;
+      }
+
+      final response = await _apiClient.post(ApiConstants.register, data: data);
       return response.data;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
   }
 
-  Future<Map<String, dynamic>> googleSignIn({
-    required String idToken,
-  }) async {
+  Future<Map<String, dynamic>> googleSignIn({required String idToken}) async {
     try {
       final response = await _apiClient.post(
         ApiConstants.googleAuth,
-        data: {
-          'id_token': idToken,
-        },
+        data: {'id_token': idToken},
       );
       return response.data;
     } on DioException catch (e) {
