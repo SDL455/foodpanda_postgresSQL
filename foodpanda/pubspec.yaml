@@ -1,11 +1,12 @@
-name: foodpanda_clone
-description: A food delivery app using GetX
+name: foodpanda
+description: "A new Flutter project."
+
 publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ^3.10.4
 
 dependencies:
   flutter:
@@ -14,7 +15,6 @@ dependencies:
   get: ^4.6.6
   get_storage: ^2.1.1
   dio: ^5.7.0
-  json_annotation: ^4.9.0
   intl: ^0.20.2
   logger: ^2.6.2
   google_maps_flutter: ^2.10.0
@@ -39,12 +39,13 @@ dependencies:
   flutter_screenutil: ^5.9.3
   connectivity_plus: ^7.0.0
 
+  cupertino_icons: ^1.0.8
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  build_runner: ^2.4.11
-  json_serializable: ^6.9.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

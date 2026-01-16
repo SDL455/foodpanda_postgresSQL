@@ -1,43 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
-import 'app/core/theme/app_theme.dart';
-import 'app/routes/app_pages.dart';
-import 'app/services/notification_service.dart';
-import 'app/bindings/initial_binding.dart';
+import 'core/theme/app_theme.dart';
+import 'core/utils/storage_service.dart';
+import 'core/network/api_client.dart';
+import 'routes/app_routes.dart';
+import 'routes/app_pages.dart';
+import 'modules/auth/controllers/auth_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize GetStorage
-  await GetStorage.init();
-
-  // Initialize Firebase
-  await Firebase.initializeApp();
-
-  // Initialize Notification Service
-  final notificationService = NotificationService();
-  Get.put<NotificationService>(notificationService, permanent: true);
-  await notificationService.initialize();
-
-  // Set system UI overlay style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ),
-  );
-
+  
+  // Initialize storage
+  await StorageService.init();
+  
+  // Initialize API client
+  ApiClient().init();
+  
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
+  
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
+  
   runApp(const FoodPandaApp());
 }
 
@@ -47,22 +43,35 @@ class FoodPandaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812),
+      designSize: const Size(375, 812), // iPhone X design size
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp(
-          title: 'Foodpanda',
+          title: 'FoodPanda',
           debugShowCheckedModeBanner: false,
+          
+          // Theme
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
-          initialBinding: InitialBinding(),
-          initialRoute: AppPages.initial,
-          getPages: AppPages.routes,
-          defaultTransition: Transition.cupertino,
+          
+          // Localization
           locale: const Locale('lo', 'LA'),
           fallbackLocale: const Locale('en', 'US'),
+          
+          // Routes
+          initialRoute: AppRoutes.splash,
+          getPages: AppPages.pages,
+          
+          // Global bindings
+          initialBinding: BindingsBuilder(() {
+            Get.put(AuthController(), permanent: true);
+          }),
+          
+          // Default transition
+          defaultTransition: Transition.cupertino,
+          transitionDuration: const Duration(milliseconds: 300),
         );
       },
     );

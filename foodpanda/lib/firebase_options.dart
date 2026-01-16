@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -49,6 +43,15 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyB3fUUerClAYIOU2BhhqpW2naSloesbKCY',
+    appId: '1:851148683967:web:a1bb673fcd9b3cbace240a',
+    messagingSenderId: '851148683967',
+    projectId: 'foodpanda-de39a',
+    authDomain: 'foodpanda-de39a.firebaseapp.com',
+    storageBucket: 'foodpanda-de39a.firebasestorage.app',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBCsjl-WohUvfEcAqlpCcXF3bRjcVEJohY',
     appId: '1:851148683967:android:a4a4d373b11f07e1ce240a',
@@ -58,6 +61,15 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDXyE-QIk_bpnV7MMCL2xyACGyAHqvSn6Y',
+    appId: '1:851148683967:ios:212970305abf0874ce240a',
+    messagingSenderId: '851148683967',
+    projectId: 'foodpanda-de39a',
+    storageBucket: 'foodpanda-de39a.firebasestorage.app',
+    iosBundleId: 'com.example.foodpanda',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyDXyE-QIk_bpnV7MMCL2xyACGyAHqvSn6Y',
     appId: '1:851148683967:ios:212970305abf0874ce240a',
     messagingSenderId: '851148683967',
