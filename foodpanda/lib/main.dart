@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foodpanda/modules/auth/controllers/auth_controller.dart';
+import 'package:foodpanda/pages/auth/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 
 import 'core/theme/app_theme.dart';

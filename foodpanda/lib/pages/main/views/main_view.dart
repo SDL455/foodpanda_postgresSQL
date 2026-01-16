@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foodpanda/pages/cart/controllers/cart_controller.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
@@ -7,7 +8,6 @@ import '../../home/views/home_view.dart';
 import '../../cart/views/cart_view.dart';
 import '../../order/views/order_list_view.dart';
 import '../../profile/views/profile_view.dart';
-import '../../../modules/cart/controllers/cart_controller.dart';
 import '../controllers/main_controller.dart';
 
 class MainView extends GetView<MainController> {
@@ -88,7 +88,7 @@ class MainView extends GetView<MainController> {
     bool showBadge = false,
   }) {
     final isSelected = controller.currentIndex.value == index;
-    
+
     return InkWell(
       onTap: () => controller.changePage(index),
       borderRadius: BorderRadius.circular(12.r),
