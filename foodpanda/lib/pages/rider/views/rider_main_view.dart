@@ -25,7 +25,7 @@ class RiderMainView extends GetView<RiderController> {
           RiderProfileView(),
         ],
       ),
-      bottomNavigationBar: Obx(() => RiderBottomNav(controller: controller)),
+      bottomNavigationBar: RiderBottomNav(controller: controller),
     );
   }
 }

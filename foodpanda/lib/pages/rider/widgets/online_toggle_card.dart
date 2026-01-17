@@ -50,7 +50,9 @@ class OnlineToggleCard extends StatelessWidget {
       ),
       child: Icon(
         controller.isOnline.value ? Icons.wifi : Icons.wifi_off,
-        color: controller.isOnline.value ? AppColors.success : AppColors.grey500,
+        color: controller.isOnline.value
+            ? AppColors.success
+            : AppColors.grey500,
         size: 24.sp,
       ),
     );
@@ -65,16 +67,17 @@ class OnlineToggleCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
-            color: controller.isOnline.value ? AppColors.success : AppColors.grey600,
+            color: controller.isOnline.value
+                ? AppColors.success
+                : AppColors.grey600,
           ),
         ),
         SizedBox(height: 2.h),
         Text(
-          controller.isOnline.value ? 'ກຳລັງຮັບງານສົ່ງອາຫານ' : 'ກົດເພື່ອເລີ່ມຮັບງານ',
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: AppColors.textSecondary,
-          ),
+          controller.isOnline.value
+              ? 'ກຳລັງຮັບງານສົ່ງອາຫານ'
+              : 'ກົດເພື່ອເລີ່ມຮັບງານ',
+          style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
         ),
       ],
     );
