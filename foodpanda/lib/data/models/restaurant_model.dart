@@ -2,68 +2,98 @@ class RestaurantModel {
   final String id;
   final String name;
   final String? description;
-  final String? image;
+  final String? logo;
   final String? coverImage;
   final double rating;
   final int reviewCount;
+  final int totalOrders;
   final String? address;
   final double? latitude;
   final double? longitude;
   final double? distance;
-  final int deliveryTime; // in minutes
-  final double deliveryFee;
-  final double minOrder;
-  final bool isOpen;
+  final int estimatedPrepTime; // in minutes
+  final int deliveryFee;
+  final int minOrderAmount;
+  final bool isActive;
   final String? openTime;
   final String? closeTime;
-  final List<String> categories;
+  final List<dynamic>? categories;
+  final List<dynamic>? reviews;
   final bool isFavorite;
 
   RestaurantModel({
     required this.id,
     required this.name,
     this.description,
-    this.image,
+    this.logo,
     this.coverImage,
     this.rating = 0,
     this.reviewCount = 0,
+    this.totalOrders = 0,
     this.address,
     this.latitude,
     this.longitude,
     this.distance,
-    this.deliveryTime = 30,
+    this.estimatedPrepTime = 30,
     this.deliveryFee = 0,
-    this.minOrder = 0,
-    this.isOpen = true,
+    this.minOrderAmount = 0,
+    this.isActive = true,
     this.openTime,
     this.closeTime,
-    this.categories = const [],
+    this.categories,
+    this.reviews,
     this.isFavorite = false,
   });
 
+  // Helper getters
+  String get displayImage => logo ?? coverImage ?? '';
+  bool get hasImage => logo != null || coverImage != null;
+  String get deliveryTimeText =>
+      '$estimatedPrepTime-${estimatedPrepTime + 10} ນາທີ';
+  String get deliveryFeeText => deliveryFee > 0
+      ? '₭${deliveryFee.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}'
+      : 'ຟຣີ';
+
   factory RestaurantModel.fromJson(Map<String, dynamic> json) {
+    // Handle _count object for reviewCount
+    int reviewCount = 0;
+    if (json['_count'] != null && json['_count']['reviews'] != null) {
+      reviewCount = json['_count']['reviews'];
+    } else if (json['reviewCount'] != null) {
+      reviewCount = json['reviewCount'];
+    } else if (json['review_count'] != null) {
+      reviewCount = json['review_count'];
+    }
+
     return RestaurantModel(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'],
-      image: json['image'],
-      coverImage: json['cover_image'],
+      // Support both 'logo' and 'image' fields
+      logo: json['logo'] ?? json['image'],
+      // Support both camelCase and snake_case
+      coverImage: json['coverImage'] ?? json['cover_image'],
       rating: (json['rating'] ?? 0).toDouble(),
-      reviewCount: json['review_count'] ?? 0,
+      reviewCount: reviewCount,
+      totalOrders: json['totalOrders'] ?? json['total_orders'] ?? 0,
       address: json['address'],
-      latitude: json['latitude']?.toDouble(),
-      longitude: json['longitude']?.toDouble(),
+      // Support both 'lat/lng' and 'latitude/longitude'
+      latitude: (json['lat'] ?? json['latitude'])?.toDouble(),
+      longitude: (json['lng'] ?? json['longitude'])?.toDouble(),
       distance: json['distance']?.toDouble(),
-      deliveryTime: json['delivery_time'] ?? 30,
-      deliveryFee: (json['delivery_fee'] ?? 0).toDouble(),
-      minOrder: (json['min_order'] ?? 0).toDouble(),
-      isOpen: json['is_open'] ?? true,
-      openTime: json['open_time'],
-      closeTime: json['close_time'],
-      categories: json['categories'] != null
-          ? List<String>.from(json['categories'])
-          : [],
-      isFavorite: json['is_favorite'] ?? false,
+      // Support both camelCase and snake_case
+      estimatedPrepTime:
+          json['estimatedPrepTime'] ?? json['delivery_time'] ?? 30,
+      deliveryFee: json['deliveryFee'] ?? json['delivery_fee'] ?? 0,
+      minOrderAmount: json['minOrderAmount'] ?? json['min_order'] ?? 0,
+      // Support both 'isActive' and 'is_open'
+      isActive: json['isActive'] ?? json['is_open'] ?? true,
+      openTime: json['openTime'] ?? json['open_time'],
+      closeTime: json['closeTime'] ?? json['close_time'],
+      // Categories can be objects or strings
+      categories: json['categories'],
+      reviews: json['reviews'],
+      isFavorite: json['isFavorite'] ?? json['is_favorite'] ?? false,
     );
   }
 
@@ -72,22 +102,24 @@ class RestaurantModel {
       'id': id,
       'name': name,
       'description': description,
-      'image': image,
-      'cover_image': coverImage,
+      'logo': logo,
+      'coverImage': coverImage,
       'rating': rating,
-      'review_count': reviewCount,
+      'reviewCount': reviewCount,
+      'totalOrders': totalOrders,
       'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
+      'lat': latitude,
+      'lng': longitude,
       'distance': distance,
-      'delivery_time': deliveryTime,
-      'delivery_fee': deliveryFee,
-      'min_order': minOrder,
-      'is_open': isOpen,
-      'open_time': openTime,
-      'close_time': closeTime,
+      'estimatedPrepTime': estimatedPrepTime,
+      'deliveryFee': deliveryFee,
+      'minOrderAmount': minOrderAmount,
+      'isActive': isActive,
+      'openTime': openTime,
+      'closeTime': closeTime,
       'categories': categories,
-      'is_favorite': isFavorite,
+      'reviews': reviews,
+      'isFavorite': isFavorite,
     };
   }
 
@@ -95,42 +127,46 @@ class RestaurantModel {
     String? id,
     String? name,
     String? description,
-    String? image,
+    String? logo,
     String? coverImage,
     double? rating,
     int? reviewCount,
+    int? totalOrders,
     String? address,
     double? latitude,
     double? longitude,
     double? distance,
-    int? deliveryTime,
-    double? deliveryFee,
-    double? minOrder,
-    bool? isOpen,
+    int? estimatedPrepTime,
+    int? deliveryFee,
+    int? minOrderAmount,
+    bool? isActive,
     String? openTime,
     String? closeTime,
-    List<String>? categories,
+    List<dynamic>? categories,
+    List<dynamic>? reviews,
     bool? isFavorite,
   }) {
     return RestaurantModel(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      image: image ?? this.image,
+      logo: logo ?? this.logo,
       coverImage: coverImage ?? this.coverImage,
       rating: rating ?? this.rating,
       reviewCount: reviewCount ?? this.reviewCount,
+      totalOrders: totalOrders ?? this.totalOrders,
       address: address ?? this.address,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       distance: distance ?? this.distance,
-      deliveryTime: deliveryTime ?? this.deliveryTime,
+      estimatedPrepTime: estimatedPrepTime ?? this.estimatedPrepTime,
       deliveryFee: deliveryFee ?? this.deliveryFee,
-      minOrder: minOrder ?? this.minOrder,
-      isOpen: isOpen ?? this.isOpen,
+      minOrderAmount: minOrderAmount ?? this.minOrderAmount,
+      isActive: isActive ?? this.isActive,
       openTime: openTime ?? this.openTime,
       closeTime: closeTime ?? this.closeTime,
       categories: categories ?? this.categories,
+      reviews: reviews ?? this.reviews,
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }

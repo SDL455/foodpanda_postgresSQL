@@ -15,7 +15,7 @@ class CartController extends GetxController {
   }
 
   double get deliveryFee {
-    return currentRestaurant.value?.deliveryFee ?? 0;
+    return (currentRestaurant.value?.deliveryFee ?? 0).toDouble();
   }
 
   double get total {
@@ -64,13 +64,15 @@ class CartController extends GetxController {
       cartItems.refresh();
     } else {
       // Add new item
-      cartItems.add(CartItemModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        menuItem: menuItem,
-        quantity: quantity,
-        selectedOptions: selectedOptions,
-        note: note,
-      ));
+      cartItems.add(
+        CartItemModel(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          menuItem: menuItem,
+          quantity: quantity,
+          selectedOptions: selectedOptions,
+          note: note,
+        ),
+      );
     }
 
     Helpers.showSnackbar(

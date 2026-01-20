@@ -20,24 +20,23 @@ class CartView extends GetView<CartController> {
       appBar: AppBar(
         title: Text(AppStrings.cart),
         actions: [
-          Obx(() => controller.cartItems.isNotEmpty
-              ? TextButton(
-                  onPressed: () async {
-                    final confirm = await Helpers.showConfirmDialog(
-                      title: AppStrings.clearCart,
-                      message: 'ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບທັງໝົດ?',
-                    );
-                    if (confirm) controller.clearCart();
-                  },
-                  child: Text(
-                    AppStrings.clearCart,
-                    style: TextStyle(
-                      color: AppColors.error,
-                      fontSize: 14.sp,
+          Obx(
+            () => controller.cartItems.isNotEmpty
+                ? TextButton(
+                    onPressed: () async {
+                      final confirm = await Helpers.showConfirmDialog(
+                        title: AppStrings.clearCart,
+                        message: 'ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບທັງໝົດ?',
+                      );
+                      if (confirm) controller.clearCart();
+                    },
+                    child: Text(
+                      AppStrings.clearCart,
+                      style: TextStyle(color: AppColors.error, fontSize: 14.sp),
                     ),
-                  ),
-                )
-              : const SizedBox()),
+                  )
+                : const SizedBox(),
+          ),
         ],
       ),
       body: Obx(() {
@@ -91,10 +90,7 @@ class CartView extends GetView<CartController> {
           SizedBox(height: 8.h),
           Text(
             'ເລືອກອາຫານຈາກຮ້ານທີ່ທ່ານມັກ',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
           ),
           SizedBox(height: 32.h),
           CustomButton(
@@ -120,7 +116,7 @@ class CartView extends GetView<CartController> {
       child: Row(
         children: [
           CachedImage(
-            imageUrl: restaurant.image ?? '',
+            imageUrl: restaurant.displayImage,
             width: 50.w,
             height: 50.w,
             borderRadius: 8.r,
@@ -140,7 +136,7 @@ class CartView extends GetView<CartController> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '${restaurant.deliveryTime} ${AppStrings.minutes}',
+                  restaurant.deliveryTimeText,
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: AppColors.textSecondary,
@@ -164,10 +160,8 @@ class CartView extends GetView<CartController> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: controller.cartItems.length,
-        separatorBuilder: (_, __) => Divider(
-          height: 1,
-          color: AppColors.grey200,
-        ),
+        separatorBuilder: (_, __) =>
+            Divider(height: 1, color: AppColors.grey200),
         itemBuilder: (context, index) {
           final item = controller.cartItems[index];
           return Slidable(
@@ -257,13 +251,12 @@ class CartView extends GetView<CartController> {
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.w),
-            child: Obx(() => Text(
-                  '${item.quantity}',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                )),
+            child: Obx(
+              () => Text(
+                '${item.quantity}',
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
           InkWell(
             onTap: () => controller.updateQuantity(item.id, item.quantity + 1),
@@ -345,7 +338,8 @@ class CartView extends GetView<CartController> {
       ),
       child: SafeArea(
         child: CustomButton(
-          text: '${AppStrings.checkout} • ${Helpers.formatCurrency(controller.total)}',
+          text:
+              '${AppStrings.checkout} • ${Helpers.formatCurrency(controller.total)}',
           onPressed: () => Get.toNamed(AppRoutes.checkout),
         ),
       ),

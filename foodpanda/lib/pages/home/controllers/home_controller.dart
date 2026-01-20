@@ -68,21 +68,24 @@ class HomeController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Load categories
-      final categoriesData = await _restaurantRepository.getCategories();
-      categories.value = categoriesData;
-
-      // Load popular restaurants
-      final popularData = await _restaurantRepository.getPopularRestaurants();
+      // Load popular stores
+      final popularData = await _restaurantRepository.getPopularStores(
+        limit: 10,
+      );
       popularRestaurants.value = popularData;
 
-      // Load nearby restaurants
+      // Load nearby stores
       if (currentPosition.value != null) {
-        final nearbyData = await _restaurantRepository.getNearbyRestaurants(
+        final nearbyData = await _restaurantRepository.getNearbyStores(
           latitude: currentPosition.value!.latitude,
           longitude: currentPosition.value!.longitude,
+          limit: 20,
         );
         nearbyRestaurants.value = nearbyData;
+      } else {
+        // If no location, just load all stores
+        final result = await _restaurantRepository.getStores(limit: 20);
+        nearbyRestaurants.value = result.stores;
       }
     } catch (e) {
       LoggerService.error('Load data error', e);
@@ -117,13 +120,8 @@ class HomeController extends GetxController {
 
     try {
       searchQuery.value = query;
-      final results = await _restaurantRepository.searchRestaurants(
-        query: query,
-        categoryId: selectedCategoryId.value.isNotEmpty
-            ? selectedCategoryId.value
-            : null,
-      );
-      searchResults.value = results;
+      final result = await _restaurantRepository.searchStores(query: query);
+      searchResults.value = result.stores;
     } catch (e) {
       LoggerService.error('Search error', e);
     }

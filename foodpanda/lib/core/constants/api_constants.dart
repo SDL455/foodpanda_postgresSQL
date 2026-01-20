@@ -22,35 +22,36 @@ class ApiConstants {
     }
   }
 
-  // Auth Endpoints
+  // Auth Endpoints (Mobile)
+  static const String socialAuth = '/mobile/auth/social';
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
-  static const String googleAuth = '/auth/google';
+  static const String googleAuth = '/mobile/auth/social';
 
   // Rider Auth Endpoints
   static const String riderLogin = '/auth/rider/login';
   static const String riderProfile = '/rider/profile';
 
-  // User Endpoints
-  static const String profile = '/users/profile';
-  static const String updateProfile = '/users/profile';
-  static const String addresses = '/users/addresses';
+  // User/Customer Endpoints
+  static const String profile = '/mobile/customer/profile';
+  static const String updateProfile = '/mobile/customer/profile';
+  static const String addresses = '/mobile/customer/addresses';
 
-  // Restaurant Endpoints
-  static const String restaurants = '/restaurants';
-  static const String restaurantDetail = '/restaurants/'; // + id
+  // Store/Restaurant Endpoints
+  static const String stores = '/mobile/stores';
+  static const String storeDetail = '/mobile/stores/'; // + id
   static const String categories = '/categories';
-  static const String popularRestaurants = '/restaurants/popular';
-  static const String nearbyRestaurants = '/restaurants/nearby';
-  static const String searchRestaurants = '/restaurants/search';
+  static const String popularStores = '/mobile/stores?sort=popular';
+  static const String nearbyStores = '/mobile/stores?sort=nearby';
+  static const String searchStores = '/mobile/stores?search=';
 
-  // Menu Endpoints
-  static const String menuItems = '/menu-items';
-  static const String menuByRestaurant = '/restaurants/'; // + id + /menu
+  // Menu/Product Endpoints
+  static const String products = '/products';
+  static const String productsByStore = '/stores/'; // + id + /products
 
   // Cart Endpoints
   static const String cart = '/cart';
@@ -60,13 +61,13 @@ class ApiConstants {
   static const String clearCart = '/cart/clear';
 
   // Order Endpoints
-  static const String orders = '/orders';
-  static const String createOrder = '/orders/create';
+  static const String orders = '/mobile/orders';
+  static const String createOrder = '/mobile/orders';
   static const String orderDetail = '/orders/'; // + id
-  static const String activeOrders = '/orders/active';
-  static const String orderHistory = '/orders/history';
+  static const String activeOrders = '/orders?status=active';
+  static const String orderHistory = '/orders?status=history';
   static const String cancelOrder = '/orders/cancel';
-  static const String trackOrder = '/orders/track/'; // + id
+  static const String trackOrder = '/orders/'; // + id
 
   // Payment Endpoints
   static const String paymentMethods = '/payments/methods';
@@ -78,8 +79,18 @@ class ApiConstants {
   static const String addReview = '/reviews/add';
 
   // Notification Endpoints
-  static const String notifications = '/notifications';
-  static const String registerFCM = '/notifications/register';
+  static const String notifications = '/mobile/notifications';
+  static const String notificationUnreadCount =
+      '/mobile/notifications/unread-count';
+  static const String markNotificationRead =
+      '/mobile/notifications/'; // + id + /read
+  static const String markAllNotificationsRead =
+      '/mobile/notifications/read-all';
+  static const String registerDeviceToken = '/mobile/device-token';
+  static const String removeDeviceToken = '/mobile/device-token';
+
+  // Favorites Endpoints
+  static const String favorites = '/mobile/customer/favorites';
 
   // Timeouts
   static const int connectionTimeout = 30000; // 30 seconds

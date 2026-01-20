@@ -41,16 +41,18 @@ class OrderListView extends GetView<OrderController> {
               if (controller.activeOrders.isNotEmpty) ...[
                 _buildSectionTitle(AppStrings.activeOrders),
                 SizedBox(height: 12.h),
-                ...controller.activeOrders
-                    .map((order) => _buildOrderCard(order, isActive: true)),
+                ...controller.activeOrders.map(
+                  (order) => _buildOrderCard(order, isActive: true),
+                ),
                 SizedBox(height: 24.h),
               ],
               // Order History
               if (controller.orderHistory.isNotEmpty) ...[
                 _buildSectionTitle(AppStrings.orderHistory),
                 SizedBox(height: 12.h),
-                ...controller.orderHistory
-                    .map((order) => _buildOrderCard(order)),
+                ...controller.orderHistory.map(
+                  (order) => _buildOrderCard(order),
+                ),
               ],
             ],
           );
@@ -96,7 +98,7 @@ class OrderListView extends GetView<OrderController> {
               Row(
                 children: [
                   CachedImage(
-                    imageUrl: order.restaurant.image ?? '',
+                    imageUrl: order.restaurant.displayImage,
                     width: 50.w,
                     height: 50.w,
                     borderRadius: 8.r,
@@ -170,7 +172,9 @@ class OrderListView extends GetView<OrderController> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         padding: EdgeInsets.symmetric(
-                            horizontal: 16.w, vertical: 8.h),
+                          horizontal: 16.w,
+                          vertical: 8.h,
+                        ),
                       ),
                       child: Text(
                         AppStrings.trackOrder,
@@ -184,7 +188,9 @@ class OrderListView extends GetView<OrderController> {
                       },
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(
-                            horizontal: 16.w, vertical: 8.h),
+                          horizontal: 16.w,
+                          vertical: 8.h,
+                        ),
                       ),
                       child: Text(
                         AppStrings.reorder,
@@ -287,10 +293,7 @@ class OrderListView extends GetView<OrderController> {
           SizedBox(height: 8.h),
           Text(
             'ເລີ່ມສັ່ງອາຫານທຳອິດຂອງທ່ານ',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
           ),
         ],
       ),
