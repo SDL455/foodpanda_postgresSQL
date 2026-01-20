@@ -1,0 +1,2 @@
+DATABASE_URL="postgresql://postgres:112233@localhost:5432/foodpanda"
+you will run (npm run db:seed) to generate account admin
