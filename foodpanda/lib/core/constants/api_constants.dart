@@ -50,7 +50,8 @@ class ApiConstants {
   static const String searchStores = '/mobile/stores?search=';
 
   // Menu/Product Endpoints
-  static const String products = '/products';
+  static const String products = '/mobile/products';
+  static const String productDetail = '/mobile/products/'; // + id
   static const String productsByStore = '/stores/'; // + id + /products
 
   // Cart Endpoints

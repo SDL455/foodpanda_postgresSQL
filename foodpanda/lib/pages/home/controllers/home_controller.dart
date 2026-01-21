@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../../data/repositories/restaurant_repository.dart';
 import '../../../data/models/restaurant_model.dart';
 import '../../../data/models/category_model.dart';
+import '../../../data/models/food_model.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../core/utils/logger_service.dart';
 import '../../../core/utils/storage_service.dart';
@@ -28,19 +29,47 @@ class HomeController extends GetxController {
   final RxString currentAddress = 'ກຳລັງຊອກຫາທີ່ຢູ່...'.obs;
   final Rxn<Position> currentPosition = Rxn<Position>();
 
+  // Foods
+  final RxList<FoodModel> popularFoods = <FoodModel>[].obs;
+  final RxList<FoodModel> allFoods = <FoodModel>[].obs;
+
   // Promotional banners
   final RxList<PromoBannerModel> promoBanners = <PromoBannerModel>[].obs;
 
   // Quick action categories for home grid
   final List<Map<String, dynamic>> quickCategories = [
-    {'icon': Icons.restaurant, 'label': 'ອາຫານ', 'color': const Color(0xFFE21B70)},
-    {'icon': Icons.local_pizza, 'label': 'ພິດຊ່າ', 'color': const Color(0xFFFF6B35)},
+    {
+      'icon': Icons.restaurant,
+      'label': 'ອາຫານ',
+      'color': const Color(0xFFE21B70),
+    },
+    {
+      'icon': Icons.local_pizza,
+      'label': 'ພິດຊ່າ',
+      'color': const Color(0xFFFF6B35),
+    },
     {'icon': Icons.coffee, 'label': 'ກາເຟ', 'color': const Color(0xFF6B4423)},
     {'icon': Icons.cake, 'label': 'ຂອງຫວານ', 'color': const Color(0xFFE91E63)},
-    {'icon': Icons.local_drink, 'label': 'ເຄື່ອງດື່ມ', 'color': const Color(0xFF00BCD4)},
-    {'icon': Icons.ramen_dining, 'label': 'ເຝີ', 'color': const Color(0xFFFF9800)},
-    {'icon': Icons.lunch_dining, 'label': 'ເບີເກີ', 'color': const Color(0xFF8BC34A)},
-    {'icon': Icons.more_horiz, 'label': 'ທັງໝົດ', 'color': const Color(0xFF607D8B)},
+    {
+      'icon': Icons.local_drink,
+      'label': 'ເຄື່ອງດື່ມ',
+      'color': const Color(0xFF00BCD4),
+    },
+    {
+      'icon': Icons.ramen_dining,
+      'label': 'ເຝີ',
+      'color': const Color(0xFFFF9800),
+    },
+    {
+      'icon': Icons.lunch_dining,
+      'label': 'ເບີເກີ',
+      'color': const Color(0xFF8BC34A),
+    },
+    {
+      'icon': Icons.more_horiz,
+      'label': 'ທັງໝົດ',
+      'color': const Color(0xFF607D8B),
+    },
   ];
 
   @override
@@ -58,21 +87,24 @@ class HomeController extends GetxController {
         id: '1',
         title: 'ສ່ວນຫຼຸດ 50%',
         subtitle: 'ສຳລັບການສັ່ງຊື້ຄັ້ງທຳອິດ',
-        imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400',
+        imageUrl:
+            'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400',
         backgroundColor: AppColors.primary,
       ),
       PromoBannerModel(
         id: '2',
         title: 'ສົ່ງຟຣີ',
         subtitle: 'ສັ່ງຂັ້ນຕ່ຳ 50,000 ກີບ',
-        imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400',
+        imageUrl:
+            'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400',
         backgroundColor: const Color(0xFF00B14F),
       ),
       PromoBannerModel(
         id: '3',
         title: 'ໂປຣໂມຊັ່ນພິເສດ',
         subtitle: 'ສັ່ງ 2 ຈ່າຍ 1',
-        imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400',
+        imageUrl:
+            'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400',
         backgroundColor: const Color(0xFFFF6B35),
       ),
     ];
@@ -118,6 +150,16 @@ class HomeController extends GetxController {
         limit: 10,
       );
       popularRestaurants.value = popularData;
+
+      // Load popular foods
+      final popularFoodsData = await _restaurantRepository.getPopularFoods(
+        limit: 10,
+      );
+      popularFoods.value = popularFoodsData;
+
+      // Load all foods
+      final foodsResult = await _restaurantRepository.getFoods(limit: 20);
+      allFoods.value = foodsResult.foods;
 
       // Load nearby stores
       if (currentPosition.value != null) {

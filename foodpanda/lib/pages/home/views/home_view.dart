@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../routes/app_routes.dart';
-import '../../../widgets/restaurant_card.dart';
+import '../../../data/models/food_model.dart';
 import '../../../widgets/shimmer_loading.dart';
 import '../../../widgets/promo_banner.dart';
 import '../controllers/home_controller.dart';
@@ -44,11 +44,11 @@ class HomeView extends GetView<HomeController> {
                       child: _buildFeaturedRestaurants(),
                     ),
                     SizedBox(height: 16.h),
-                    // All Restaurants List
+                    // All Foods List
                     _buildSection(
-                      title: AppStrings.allRestaurants,
-                      onSeeAll: () => Get.toNamed(AppRoutes.restaurants),
-                      child: _buildAllRestaurants(),
+                      title: AppStrings.allFoods,
+                      onSeeAll: () => Get.toNamed(AppRoutes.foods),
+                      child: _buildAllFoods(),
                     ),
                     SizedBox(height: 100.h),
                   ]),
@@ -126,11 +126,6 @@ class HomeView extends GetView<HomeController> {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                    ),
-                                    Icon(
-                                      Icons.keyboard_arrow_down,
-                                      color: AppColors.white,
-                                      size: 18.sp,
                                     ),
                                   ],
                                 ),
@@ -658,23 +653,214 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildAllRestaurants() {
-    return Obx(
-      () => ListView.separated(
+  Widget _buildAllFoods() {
+    return Obx(() {
+      final foods = controller.allFoods.toList();
+      if (foods.isEmpty) {
+        return Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Center(
+            child: Text(
+              'ບໍ່ມີອາຫານ',
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+            ),
+          ),
+        );
+      }
+      return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 16.w),
-        itemCount: controller.nearbyRestaurants.length,
-        separatorBuilder: (_, __) => SizedBox(height: 12.h),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12.h,
+          crossAxisSpacing: 12.w,
+          childAspectRatio: 0.75,
+        ),
+        itemCount: foods.length,
         itemBuilder: (context, index) {
-          final restaurant = controller.nearbyRestaurants[index];
-          return RestaurantCard(
-            restaurant: restaurant,
-            isHorizontal: true,
-            onTap: () =>
-                Get.toNamed(AppRoutes.restaurantDetail, arguments: restaurant),
-          );
+          final food = foods[index];
+          return _buildFoodCard(food);
         },
+      );
+    });
+  }
+
+  Widget _buildFoodCard(FoodModel food) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.foodDetail, arguments: food),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withOpacity(0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Food Image
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.r),
+                    topRight: Radius.circular(16.r),
+                  ),
+                  child: Image.network(
+                    food.displayImage,
+                    width: double.infinity,
+                    height: 120.h,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: double.infinity,
+                      height: 120.h,
+                      color: AppColors.grey200,
+                      child: Icon(
+                        Icons.fastfood,
+                        size: 40.sp,
+                        color: AppColors.grey400,
+                      ),
+                    ),
+                  ),
+                ),
+                // Store badge
+                Positioned(
+                  top: 8.h,
+                  left: 8.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 6.w,
+                      vertical: 3.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.store,
+                          color: AppColors.primary,
+                          size: 10.sp,
+                        ),
+                        SizedBox(width: 3.w),
+                        Text(
+                          food.store.name.length > 12
+                              ? '${food.store.name.substring(0, 12)}...'
+                              : food.store.name,
+                          style: TextStyle(
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Sold badge
+                if (food.totalSold > 0)
+                  Positioned(
+                    bottom: 8.h,
+                    right: 8.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 3.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        food.soldText,
+                        style: TextStyle(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            // Food Info
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(10.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          food.name,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (food.category != null) ...[
+                          SizedBox(height: 2.h),
+                          Text(
+                            food.category!.name,
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            food.priceText,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(4.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: AppColors.white,
+                            size: 16.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

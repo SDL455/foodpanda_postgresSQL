@@ -3,6 +3,10 @@ import 'package:foodpanda/pages/auth/views/login_view.dart';
 import 'package:foodpanda/pages/auth/views/register_view.dart';
 import 'package:foodpanda/pages/cart/bindings/cart_binding.dart';
 import 'package:foodpanda/pages/cart/views/cart_view.dart';
+import 'package:foodpanda/pages/food/bindings/food_detail_binding.dart';
+import 'package:foodpanda/pages/food/bindings/food_list_binding.dart';
+import 'package:foodpanda/pages/food/views/food_detail_view.dart';
+import 'package:foodpanda/pages/food/views/food_list_view.dart';
 import 'package:foodpanda/pages/main/bindings/main_binding.dart';
 import 'package:foodpanda/pages/main/views/main_view.dart';
 import 'package:foodpanda/pages/order/bindings/order_binding.dart';
@@ -49,6 +53,20 @@ class AppPages {
       name: AppRoutes.cart,
       page: () => const CartView(),
       binding: CartBinding(),
+    ),
+
+    // Food List
+    GetPage(
+      name: AppRoutes.foods,
+      page: () => const FoodListView(),
+      binding: FoodListBinding(),
+    ),
+
+    // Food Detail
+    GetPage(
+      name: AppRoutes.foodDetail,
+      page: () => const FoodDetailView(),
+      binding: FoodDetailBinding(),
     ),
 
     // Orders

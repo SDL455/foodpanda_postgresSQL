@@ -33,7 +33,14 @@ class AppStrings {
   static const String specialOffers = 'ໂປຣໂມຊັ່ນພິເສດ';
   static const String orderNow = 'ສັ່ງດຽວນີ້';
   static const String allRestaurants = 'ຮ້ານອາຫານທັງໝົດ';
+  static const String allFoods = 'ອາຫານທັງໝົດ';
+  static const String popularFoods = 'ອາຫານຍອດນິຍົມ';
   static const String featuredRestaurants = 'ຮ້ານແນະນຳ';
+  static const String foodDetail = 'ລາຍລະອຽດອາຫານ';
+  static const String addToCartSuccess = 'ເພີ່ມໃສ່ກະຕ່າແລ້ວ';
+  static const String selectOptions = 'ເລືອກຕົວເລືອກ';
+  static const String quantity = 'ຈຳນວນ';
+  static const String fromStore = 'ຈາກຮ້ານ';
 
   // Restaurant
   static const String restaurant = 'ຮ້ານອາຫານ';
