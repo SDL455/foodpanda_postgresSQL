@@ -91,12 +91,6 @@
                             {{ formatCurrency(record.basePrice) }}
                         </template>
 
-                        <template v-if="column.key === 'stock'">
-                            <a-tag :color="record.stock?.quantity > 10 ? 'green' : 'red'">
-                                {{ record.stock?.quantity || 0 }}
-                            </a-tag>
-                        </template>
-
                         <template v-if="column.key === 'status'">
                             <a-switch :checked="record.isAvailable" checked-children="ເປີດ" un-checked-children="ປິດ"
                                 @change="(checked: boolean) => toggleAvailable(record, checked)" />
@@ -168,59 +162,29 @@
                     <a-textarea v-model:value="productForm.description" placeholder="ລາຍລະອຽດສິນຄ້າ" :rows="3" />
                 </a-form-item>
 
-                <a-row :gutter="16">
-                    <a-col :span="8">
-                        <a-form-item label="ລາຄາ (ກີບ)" required>
-                            <a-input-number v-model:value="productForm.basePrice" :min="0" style="width: 100%"
-                                :formatter="(value: any) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-                                :parser="(value: any) => value.replace(/\$\s?|(,*)/g, '')" />
-                        </a-form-item>
-                    </a-col>
-                    <a-col :span="8">
-                        <a-form-item label="SKU">
-                            <a-input v-model:value="productForm.sku" placeholder="SKU" />
-                        </a-form-item>
-                    </a-col>
-                    <a-col :span="8">
-                        <a-form-item label="ຈຳນວນໃນສາງ">
-                            <a-input-number v-model:value="productForm.stockQuantity" :min="0" style="width: 100%" />
-                        </a-form-item>
-                    </a-col>
-                </a-row>
-
-                <!-- Main Image -->
-                <a-form-item label="ຮູບພາບຫຼັກ">
-                    <a-input v-model:value="productForm.image" placeholder="URL ຮູບພາບຫຼັກ" />
+                <a-form-item label="ລາຄາ (ກີບ)" required>
+                    <a-input-number v-model:value="productForm.basePrice" :min="0" style="width: 100%"
+                        :formatter="(value: any) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                        :parser="(value: any) => value.replace(/\$\s?|(,*)/g, '')" />
                 </a-form-item>
 
-                <!-- Multiple Images -->
-                <a-form-item label="ຮູບພາບເພີ່ມເຕີມ">
-                    <div class="image-list">
-                        <div v-for="(img, index) in productForm.images" :key="index" class="image-item">
-                            <a-input v-model:value="productForm.images[index]" placeholder="URL ຮູບພາບ"
-                                style="flex: 1;" />
-                            <a-button danger type="text" @click="removeImage(index)">
-                                <DeleteOutlined />
-                            </a-button>
+                <!-- Multiple Images Upload -->
+                <a-form-item label="ຮູບພາບສິນຄ້າ">
+                    <a-upload v-model:file-list="fileList" list-type="picture-card" :multiple="true"
+                        :custom-request="handleUpload" :before-upload="beforeUpload" @remove="handleRemoveFile"
+                        accept="image/*">
+                        <div v-if="fileList.length < 10">
+                            <PlusOutlined />
+                            <div style="margin-top: 8px">ອັບໂຫຼດ</div>
                         </div>
-                        <a-button type="dashed" block @click="addImage" style="margin-top: 8px;">
-                            <PlusOutlined /> ເພີ່ມຮູບພາບ
-                        </a-button>
+                    </a-upload>
+                    <div style="font-size: 12px; color: #888; margin-top: 4px;">
+                        ສາມາດອັບໂຫຼດໄດ້ສູງສຸດ 10 ຮູບ (ຮູບທຳອິດຈະເປັນຮູບຫຼັກ)
                     </div>
                 </a-form-item>
 
-                <!-- Image Preview -->
-                <div v-if="allImages.length > 0" style="margin-top: 12px;">
-                    <div style="font-size: 12px; color: #888; margin-bottom: 8px;">ຕົວຢ່າງຮູບພາບ:</div>
-                    <a-space wrap>
-                        <div v-for="(img, index) in allImages" :key="index" class="image-preview">
-                            <img :src="img" alt="preview" @error="(e: any) => e.target.style.display = 'none'" />
-                        </div>
-                    </a-space>
-                </div>
-
                 <!-- Variants -->
-                <a-divider>ຕົວເລືອກສິນຄ້າ (Variants)</a-divider>
+                <!-- <a-divider>ຕົວເລືອກສິນຄ້າ (Variants)</a-divider>
                 <div class="variant-list">
                     <div v-for="(variant, index) in productForm.variants" :key="index" class="variant-item">
                         <a-row :gutter="8" align="middle">
@@ -241,7 +205,7 @@
                     <a-button type="dashed" block @click="addVariant" style="margin-top: 8px;">
                         <PlusOutlined /> ເພີ່ມຕົວເລືອກ
                     </a-button>
-                </div>
+                </div> -->
             </a-form>
         </a-modal>
     </div>
@@ -256,8 +220,10 @@ import {
     FolderOutlined,
     AppstoreOutlined,
     CloseCircleOutlined,
+    LoadingOutlined,
 } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
+import type { UploadProps, UploadFile } from "ant-design-vue";
 
 definePageMeta({
     middleware: "auth",
@@ -295,31 +261,85 @@ const productForm = reactive({
     description: "",
     basePrice: 0,
     categoryId: undefined as string | undefined,
-    sku: "",
-    image: "",
     images: [] as string[],
     variants: [] as { name: string; priceDelta: number }[],
-    stockQuantity: 0,
 });
+
+const fileList = ref<UploadFile[]>([]);
+const uploading = ref(false);
 
 const columns = [
     { title: "ສິນຄ້າ", key: "name" },
     { title: "ຮູບພາບ", key: "images", width: 120 },
     { title: "ລາຄາ", key: "price", width: 120 },
-    { title: "ສາງ", key: "stock", width: 80 },
     { title: "ສະຖານະ", key: "status", width: 100 },
     { title: "ການກະທຳ", key: "actions", width: 120 },
 ];
 
-// Computed: all images for preview
-const allImages = computed(() => {
-    const imgs: string[] = [];
-    if (productForm.image) imgs.push(productForm.image);
-    productForm.images.forEach(img => {
-        if (img) imgs.push(img);
-    });
-    return imgs;
-});
+// Get uploaded image URLs from fileList
+const getUploadedImages = () => {
+    return fileList.value
+        .filter(file => file.status === 'done' && file.response?.url)
+        .map(file => file.response.url as string);
+};
+
+// Upload handlers
+const beforeUpload: UploadProps['beforeUpload'] = (file) => {
+    const isImage = file.type?.startsWith('image/');
+    if (!isImage) {
+        message.error('ສາມາດອັບໂຫຼດໄດ້ສະເພາະໄຟລ໌ຮູບພາບເທົ່ານັ້ນ!');
+        return false;
+    }
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+        message.error('ຮູບພາບຕ້ອງມີຂະໜາດນ້ອຍກວ່າ 5MB!');
+        return false;
+    }
+    return true;
+};
+
+const handleUpload: UploadProps['customRequest'] = async (options) => {
+    const { file, onSuccess, onError, onProgress } = options;
+
+    const formData = new FormData();
+    formData.append('file', file as File);
+
+    try {
+        onProgress?.({ percent: 30 });
+
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        onProgress?.({ percent: 70 });
+
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.files?.length > 0) {
+            onProgress?.({ percent: 100 });
+            onSuccess?.(data.files[0]);
+        } else {
+            throw new Error('Upload failed');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        onError?.(error as Error);
+        message.error('ອັບໂຫຼດຮູບພາບບໍ່ສຳເລັດ');
+    }
+};
+
+const handleRemoveFile = (file: UploadFile) => {
+    const index = fileList.value.indexOf(file);
+    if (index > -1) {
+        fileList.value.splice(index, 1);
+    }
+    return true;
+};
 
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("lo-LA", {
@@ -454,12 +474,10 @@ const resetForm = () => {
         description: "",
         basePrice: 0,
         categoryId: undefined,
-        sku: "",
-        image: "",
         images: [],
         variants: [],
-        stockQuantity: 0,
     });
+    fileList.value = [];
 };
 
 const editProduct = (product: any) => {
@@ -469,21 +487,33 @@ const editProduct = (product: any) => {
         description: product.description || "",
         basePrice: product.basePrice,
         categoryId: product.categoryId,
-        sku: product.sku || "",
-        image: product.image || "",
         images: product.images?.map((img: any) => img.url) || [],
         variants: product.variants?.map((v: any) => ({ name: v.name, priceDelta: v.priceDelta })) || [],
-        stockQuantity: product.stock?.quantity || 0,
     });
+
+    // Load existing images into fileList
+    const existingImages: UploadFile[] = [];
+    if (product.image) {
+        existingImages.push({
+            uid: 'main-image',
+            name: 'ຮູບຫຼັກ',
+            status: 'done',
+            url: product.image,
+            response: { url: product.image },
+        });
+    }
+    product.images?.forEach((img: any, index: number) => {
+        existingImages.push({
+            uid: `image-${index}`,
+            name: `ຮູບ ${index + 1}`,
+            status: 'done',
+            url: img.url,
+            response: { url: img.url },
+        });
+    });
+    fileList.value = existingImages;
+
     showCreateModal.value = true;
-};
-
-const addImage = () => {
-    productForm.images.push("");
-};
-
-const removeImage = (index: number) => {
-    productForm.images.splice(index, 1);
 };
 
 const addVariant = () => {
@@ -500,22 +530,30 @@ const handleSave = async () => {
         return;
     }
 
+    // Check if there are still uploading files
+    const hasUploading = fileList.value.some(f => f.status === 'uploading');
+    if (hasUploading) {
+        message.warning("ກະລຸນາລໍຖ້າໃຫ້ຮູບພາບອັບໂຫຼດສຳເລັດກ່ອນ");
+        return;
+    }
+
     saving.value = true;
     try {
-        // Filter out empty values
-        const validImages = productForm.images.filter(img => img.trim() !== "");
         const validVariants = productForm.variants.filter(v => v.name.trim() !== "");
+
+        // Get all uploaded image URLs
+        const uploadedImages = getUploadedImages();
+        const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : undefined;
+        const additionalImages = uploadedImages.slice(1);
 
         const payload = {
             name: productForm.name,
             description: productForm.description,
             basePrice: productForm.basePrice,
             categoryId: productForm.categoryId || undefined,
-            sku: productForm.sku || undefined,
-            image: productForm.image || undefined,
-            images: validImages,
+            image: mainImage,
+            images: additionalImages,
             variants: validVariants.length > 0 ? validVariants : undefined,
-            stockQuantity: productForm.stockQuantity,
         };
 
         if (editingProduct.value) {
@@ -563,37 +601,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.image-list {
-    border: 1px dashed #d9d9d9;
-    border-radius: 8px;
-    padding: 12px;
-    background: #fafafa;
-}
-
-.image-item {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.image-item:last-child {
-    margin-bottom: 0;
-}
-
-.image-preview {
-    width: 60px;
-    height: 60px;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid #d9d9d9;
-}
-
-.image-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .variant-list {
     border: 1px dashed #d9d9d9;
     border-radius: 8px;
@@ -607,5 +614,15 @@ onMounted(() => {
 
 .variant-item:last-child {
     margin-bottom: 0;
+}
+
+:deep(.ant-upload-list-picture-card) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+:deep(.ant-upload-list-picture-card .ant-upload-list-item) {
+    margin: 0;
 }
 </style>

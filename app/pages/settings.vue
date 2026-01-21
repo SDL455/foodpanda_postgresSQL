@@ -105,7 +105,7 @@
             </a-col>
 
             <!-- Merchant Info (For Merchant Users) -->
-            <a-col v-if="!authStore.isAdmin && authStore.user?.merchant" :xs="24">
+            <!-- <a-col v-if="!authStore.isAdmin && authStore.user?.merchant" :xs="24">
                 <div class="card">
                     <div class="card-header">
                         <h2>
@@ -144,7 +144,7 @@
                         </a-col>
                     </a-row>
                 </div>
-            </a-col>
+            </a-col> -->
 
             <!-- Admin Store Overview -->
             <a-col v-if="authStore.isAdmin" :xs="24">

@@ -28,6 +28,12 @@ class AppStrings {
   static const String nearbyRestaurants = 'ຮ້ານອາຫານໃກ້ຄຽງ';
   static const String seeAll = 'ເບິ່ງທັງໝົດ';
   static const String deliverTo = 'ສົ່ງໄປທີ່';
+  static const String welcomeMessage = 'ຍິນດີຕ້ອນຮັບ!';
+  static const String whatWouldYouLike = 'ມື້ນີ້ຢາກທານຫຍັງ?';
+  static const String specialOffers = 'ໂປຣໂມຊັ່ນພິເສດ';
+  static const String orderNow = 'ສັ່ງດຽວນີ້';
+  static const String allRestaurants = 'ຮ້ານອາຫານທັງໝົດ';
+  static const String featuredRestaurants = 'ຮ້ານແນະນຳ';
 
   // Restaurant
   static const String restaurant = 'ຮ້ານອາຫານ';

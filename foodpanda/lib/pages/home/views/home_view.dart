@@ -5,8 +5,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../routes/app_routes.dart';
 import '../../../widgets/restaurant_card.dart';
-import '../../../widgets/category_chip.dart';
 import '../../../widgets/shimmer_loading.dart';
+import '../../../widgets/promo_banner.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -22,10 +22,8 @@ class HomeView extends GetView<HomeController> {
           color: AppColors.primary,
           child: CustomScrollView(
             slivers: [
-              // App Bar
-              _buildAppBar(),
-              // Search Bar
-              _buildSearchBar(),
+              // Modern App Bar with gradient
+              _buildModernAppBar(),
               // Content
               Obx(() {
                 if (controller.isLoading.value) {
@@ -33,19 +31,24 @@ class HomeView extends GetView<HomeController> {
                 }
                 return SliverList(
                   delegate: SliverChildListDelegate([
-                    // Categories
-                    _buildCategories(),
-                    // Popular Restaurants
+                    // Promotional Banners
+                    _buildPromoBanners(),
+                    SizedBox(height: 20.h),
+                    // Quick Category Grid
+                    _buildQuickCategories(),
+                    SizedBox(height: 24.h),
+                    // Featured/Popular Restaurants
                     _buildSection(
-                      title: AppStrings.popularRestaurants,
+                      title: AppStrings.featuredRestaurants,
                       onSeeAll: () => Get.toNamed(AppRoutes.restaurants),
-                      child: _buildPopularRestaurants(),
+                      child: _buildFeaturedRestaurants(),
                     ),
-                    // Nearby Restaurants
+                    SizedBox(height: 16.h),
+                    // All Restaurants List
                     _buildSection(
-                      title: AppStrings.nearbyRestaurants,
+                      title: AppStrings.allRestaurants,
                       onSeeAll: () => Get.toNamed(AppRoutes.restaurants),
-                      child: _buildNearbyRestaurants(),
+                      child: _buildAllRestaurants(),
                     ),
                     SizedBox(height: 100.h),
                   ]),
@@ -58,122 +61,294 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildAppBar() {
-    return SliverAppBar(
-      floating: true,
-      backgroundColor: AppColors.white,
-      elevation: 0,
-      toolbarHeight: 70.h,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppStrings.deliverTo,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            children: [
-              Icon(Icons.location_on, color: AppColors.primary, size: 18.sp),
-              SizedBox(width: 4.w),
-              Expanded(
-                child: Obx(() => Text(
-                      controller.currentAddress.value,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    )),
-              ),
-              Icon(Icons.keyboard_arrow_down,
-                  color: AppColors.textPrimary, size: 20.sp),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined,
-              color: AppColors.textPrimary),
-          onPressed: () {},
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSearchBar() {
+  Widget _buildModernAppBar() {
     return SliverToBoxAdapter(
       child: Container(
-        color: AppColors.white,
-        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-        child: GestureDetector(
-          onTap: () => Get.toNamed(AppRoutes.search),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: AppColors.grey100,
-              borderRadius: BorderRadius.circular(12.r),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.primary, AppColors.primary.withOpacity(0.9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Top Bar with location and notifications
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+              child: Row(
+                children: [
+                  // Location Section
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        // Navigate to address selection
+                      },
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8.w),
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Icon(
+                              Icons.location_on,
+                              color: AppColors.white,
+                              size: 20.sp,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppStrings.deliverTo,
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    color: AppColors.white.withOpacity(0.8),
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Obx(
+                                        () => Text(
+                                          controller.currentAddress.value,
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.white,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: AppColors.white,
+                                      size: 18.sp,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  // Notification Button
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: IconButton(
+                      icon: Stack(
+                        children: [
+                          Icon(
+                            Icons.notifications_outlined,
+                            color: AppColors.white,
+                            size: 24.sp,
+                          ),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 8.w,
+                              height: 8.w,
+                              decoration: const BoxDecoration(
+                                color: AppColors.ratingActive,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      onPressed: () {},
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                Icon(Icons.search, color: AppColors.textHint, size: 22.sp),
-                SizedBox(width: 12.w),
-                Text(
-                  AppStrings.searchHint,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.textHint,
+            // Search Bar
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 20.h),
+              child: GestureDetector(
+                onTap: () => Get.toNamed(AppRoutes.search),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 14.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: AppColors.grey500, size: 22.sp),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          AppStrings.searchHint,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: AppColors.textHint,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.tune,
+                              color: AppColors.primary,
+                              size: 16.sp,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              'ກັ່ນຕອງ',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCategories() {
+  Widget _buildPromoBanners() {
+    return Obx(() {
+      final banners = controller.promoBanners.toList();
+      if (banners.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      return Padding(
+        padding: EdgeInsets.only(top: 16.h),
+        child: PromoBannerCarousel(
+          banners: banners,
+          onBannerTap: (banner) {
+            // Handle banner tap
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildQuickCategories() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Text(
-              AppStrings.categories,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+          Text(
+            AppStrings.whatWouldYouLike,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: 12.h),
-          SizedBox(
-            height: 100.h,
-            child: Obx(() => ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  itemCount: controller.categories.length,
-                  separatorBuilder: (_, __) => SizedBox(width: 12.w),
-                  itemBuilder: (context, index) {
-                    final category = controller.categories[index];
-                    return Obx(() => CategoryChip(
-                          category: category,
-                          isSelected:
-                              controller.selectedCategoryId.value == category.id,
-                          onTap: () => controller.selectCategory(category.id),
-                        ));
-                  },
-                )),
+          SizedBox(height: 16.h),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              mainAxisSpacing: 16.h,
+              crossAxisSpacing: 12.w,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: controller.quickCategories.length,
+            itemBuilder: (context, index) {
+              final category = controller.quickCategories[index];
+              return _buildCategoryItem(
+                icon: category['icon'] as IconData,
+                label: category['label'] as String,
+                color: category['color'] as Color,
+                onTap: () {
+                  // Navigate to category
+                  if (index == controller.quickCategories.length - 1) {
+                    // "ທັງໝົດ" button - show all categories
+                    Get.toNamed(AppRoutes.restaurants);
+                  }
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryItem({
+    required IconData icon,
+    required String label,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 60.w,
+            height: 60.w,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color.withOpacity(0.15), color.withOpacity(0.08)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: color.withOpacity(0.2), width: 1),
+            ),
+            child: Icon(icon, color: color, size: 28.sp),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -185,84 +360,323 @@ class HomeView extends GetView<HomeController> {
     required VoidCallback onSeeAll,
     required Widget child,
   }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              GestureDetector(
+                onTap: onSeeAll,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 6.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        AppStrings.seeAll,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: AppColors.primary,
+                        size: 12.sp,
+                      ),
+                    ],
                   ),
                 ),
-                TextButton(
-                  onPressed: onSeeAll,
-                  child: Text(
-                    AppStrings.seeAll,
-                    style: TextStyle(
-                      fontSize: 14.sp,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 12.h),
+        child,
+      ],
+    );
+  }
+
+  Widget _buildFeaturedRestaurants() {
+    return SizedBox(
+      height: 260.h,
+      child: Obx(
+        () => ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          itemCount: controller.popularRestaurants.length,
+          separatorBuilder: (_, __) => SizedBox(width: 12.w),
+          itemBuilder: (context, index) {
+            final restaurant = controller.popularRestaurants[index];
+            return _buildFeaturedCard(restaurant);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturedCard(restaurant) {
+    return GestureDetector(
+      onTap: () =>
+          Get.toNamed(AppRoutes.restaurantDetail, arguments: restaurant),
+      child: Container(
+        width: 220.w,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withOpacity(0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image with gradient overlay
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.r),
+                    topRight: Radius.circular(16.r),
+                  ),
+                  child: Image.network(
+                    restaurant.displayImage,
+                    width: double.infinity,
+                    height: 130.h,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: double.infinity,
+                      height: 130.h,
+                      color: AppColors.grey200,
+                      child: Icon(
+                        Icons.restaurant,
+                        size: 40.sp,
+                        color: AppColors.grey400,
+                      ),
+                    ),
+                  ),
+                ),
+                // Gradient overlay
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 50.h,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          AppColors.black.withOpacity(0.4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Rating badge
+                Positioned(
+                  top: 10.h,
+                  left: 10.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: AppColors.ratingActive,
+                          size: 14.sp,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          restaurant.rating.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Favorite button
+                Positioned(
+                  top: 10.h,
+                  right: 10.w,
+                  child: Container(
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      restaurant.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: restaurant.isFavorite
+                          ? AppColors.primary
+                          : AppColors.grey500,
+                      size: 18.sp,
+                    ),
+                  ),
+                ),
+                // Delivery time badge
+                Positioned(
+                  bottom: 10.h,
+                  left: 10.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
                       color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.access_time,
+                          color: AppColors.white,
+                          size: 12.sp,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          restaurant.deliveryTimeText,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-          child,
-        ],
+            // Restaurant info
+            Padding(
+              padding: EdgeInsets.all(12.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    restaurant.name,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 6.h),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.delivery_dining,
+                        color: AppColors.grey500,
+                        size: 14.sp,
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        restaurant.deliveryFeeText,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Container(
+                        width: 4.w,
+                        height: 4.w,
+                        decoration: const BoxDecoration(
+                          color: AppColors.grey400,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          '(${restaurant.reviewCount} ລີວິວ)',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.textSecondary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPopularRestaurants() {
-    return SizedBox(
-      height: 240.h,
-      child: Obx(() => ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            itemCount: controller.popularRestaurants.length,
-            separatorBuilder: (_, __) => SizedBox(width: 12.w),
-            itemBuilder: (context, index) {
-              final restaurant = controller.popularRestaurants[index];
-              return RestaurantCard(
-                restaurant: restaurant,
-                onTap: () => Get.toNamed(
-                  AppRoutes.restaurantDetail,
-                  arguments: restaurant,
-                ),
-              );
-            },
-          )),
+  Widget _buildAllRestaurants() {
+    return Obx(
+      () => ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        itemCount: controller.nearbyRestaurants.length,
+        separatorBuilder: (_, __) => SizedBox(height: 12.h),
+        itemBuilder: (context, index) {
+          final restaurant = controller.nearbyRestaurants[index];
+          return RestaurantCard(
+            restaurant: restaurant,
+            isHorizontal: true,
+            onTap: () =>
+                Get.toNamed(AppRoutes.restaurantDetail, arguments: restaurant),
+          );
+        },
+      ),
     );
-  }
-
-  Widget _buildNearbyRestaurants() {
-    return Obx(() => ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          itemCount: controller.nearbyRestaurants.length,
-          separatorBuilder: (_, __) => SizedBox(height: 12.h),
-          itemBuilder: (context, index) {
-            final restaurant = controller.nearbyRestaurants[index];
-            return RestaurantCard(
-              restaurant: restaurant,
-              isHorizontal: true,
-              onTap: () => Get.toNamed(
-                AppRoutes.restaurantDetail,
-                arguments: restaurant,
-              ),
-            );
-          },
-        ));
   }
 
   Widget _buildShimmerLoading() {
@@ -271,20 +685,49 @@ class HomeView extends GetView<HomeController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Banner shimmer
+          ShimmerLoading(
+            child: Container(
+              height: 160.h,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 24.h),
           // Categories shimmer
           ShimmerLoading(
-            child: Row(
-              children: List.generate(
-                4,
-                (index) => Container(
-                  width: 80.w,
-                  height: 100.h,
-                  margin: EdgeInsets.only(right: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12.r),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                mainAxisSpacing: 16.h,
+                crossAxisSpacing: 12.w,
+                childAspectRatio: 0.85,
+              ),
+              itemCount: 8,
+              itemBuilder: (context, index) => Column(
+                children: [
+                  Container(
+                    width: 60.w,
+                    height: 60.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
                   ),
-                ),
+                  SizedBox(height: 8.h),
+                  Container(
+                    width: 50.w,
+                    height: 12.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -299,7 +742,7 @@ class HomeView extends GetView<HomeController> {
                   margin: EdgeInsets.only(bottom: 12.h),
                   decoration: BoxDecoration(
                     color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(16.r),
                   ),
                 ),
               ),

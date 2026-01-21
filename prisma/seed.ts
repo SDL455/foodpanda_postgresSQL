@@ -13,7 +13,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log(" Seeding database...");
 
   // Create Super Admin
   const adminPassword = await bcrypt.hash("admin123", 12);
