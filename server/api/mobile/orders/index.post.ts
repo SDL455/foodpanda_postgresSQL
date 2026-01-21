@@ -2,6 +2,7 @@ import { z } from 'zod'
 import prisma from '../../../utils/prisma'
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '../../../utils/response'
 import { verifyToken, getTokenFromHeader } from '../../../utils/jwt'
+import { sendNotification, notifyStoreNewOrder } from '../../../services/notification'
 
 const createOrderSchema = z.object({
   storeId: z.string().min(1),
@@ -145,8 +146,26 @@ export default defineEventHandler(async (event) => {
     data: { totalOrders: { increment: 1 } },
   })
   
-  // TODO: Send notification to store
+  // Send notifications
+  try {
+    // Notify customer that order was placed
+    await sendNotification({
+      type: 'ORDER_PLACED',
+      customerId,
+      orderId: order.id,
+      data: {
+        orderNo: order.orderNo,
+        storeName: store.name,
+        total: order.total,
+      },
+    })
+    
+    // Notify store about new order
+    await notifyStoreNewOrder(order.id)
+  } catch (error) {
+    console.error('Failed to send notifications:', error)
+    // Don't fail the request if notification fails
+  }
   
   return successResponse(order, 'ສັ່ງຊື້ສຳເລັດ')
 })
-

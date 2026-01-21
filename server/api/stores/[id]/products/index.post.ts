@@ -9,7 +9,9 @@ const createProductSchema = z.object({
   categoryId: z.string().optional(),
   sku: z.string().optional(),
   image: z.string().optional(),
+  images: z.array(z.string()).optional(),
   isAvailable: z.boolean().optional(),
+  stockQuantity: z.number().optional(),
   variants: z.array(z.object({
     name: z.string(),
     priceDelta: z.number().optional(),
@@ -48,7 +50,7 @@ export default defineEventHandler(async (event) => {
     return errorResponse(result.error.errors[0].message)
   }
   
-  const { variants, ...productData } = result.data
+  const { variants, images, stockQuantity, ...productData } = result.data
   
   const product = await prisma.product.create({
     data: {
@@ -57,15 +59,22 @@ export default defineEventHandler(async (event) => {
       variants: variants ? {
         create: variants,
       } : undefined,
+      images: images && images.length > 0 ? {
+        create: images.map((url, index) => ({
+          url,
+          sortOrder: index,
+        })),
+      } : undefined,
       stock: {
         create: {
-          quantity: 0,
+          quantity: stockQuantity || 0,
         },
       },
     },
     include: {
       category: true,
       variants: true,
+      images: true,
       stock: true,
     },
   })

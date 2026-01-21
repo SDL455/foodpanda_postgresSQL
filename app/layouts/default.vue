@@ -6,13 +6,8 @@
         <div class="logo">
           <h1>🐼 Foodpanda</h1>
         </div>
-        
-        <a-menu
-          v-model:selectedKeys="selectedKeys"
-          mode="inline"
-          :items="menuItems"
-          @click="handleMenuClick"
-        />
+
+        <a-menu v-model:selectedKeys="selectedKeys" mode="inline" :items="menuItems" @click="handleMenuClick" />
       </aside>
 
       <!-- Main Content -->
@@ -25,17 +20,20 @@
               <a-breadcrumb-item>{{ currentPageTitle }}</a-breadcrumb-item>
             </a-breadcrumb>
           </div>
-          
+
           <div class="header-right">
+            <a-tag v-if="authStore.isAdmin" color="red">Admin</a-tag>
+            <a-tag v-else color="blue">{{ authStore.user?.merchant?.name || 'Merchant' }}</a-tag>
+
             <a-dropdown>
-              <a-space>
+              <a-space style="cursor: pointer; margin-left: 12px;">
                 <a-avatar :src="authStore.user?.avatar">
                   {{ authStore.user?.fullName?.charAt(0) || 'U' }}
                 </a-avatar>
                 <span>{{ authStore.user?.fullName || authStore.user?.email }}</span>
                 <DownOutlined />
               </a-space>
-              
+
               <template #overlay>
                 <a-menu>
                   <a-menu-item key="profile">
@@ -91,6 +89,7 @@ const currentPageTitle = computed(() => {
     '/dashboard': 'Dashboard',
     '/admin/merchants': 'ຈັດການ Merchant',
     '/admin/riders': 'ຈັດການ Rider',
+    '/admin/customers': 'ຈັດການລູກຄ້າ',
     '/stores': 'ຮ້ານຄ້າ',
     '/products': 'ສິນຄ້າ',
     '/orders': 'ຄຳສັ່ງຊື້',
@@ -120,35 +119,45 @@ const menuItems = computed<MenuProps['items']>(() => {
           {
             key: '/admin/merchants',
             icon: () => h(TeamOutlined),
-            label: 'Merchant',
+            label: 'ເຈົ້າຂອງຮ້ານ',
           },
           {
             key: '/admin/riders',
             icon: () => h(CarOutlined),
-            label: 'Rider',
+            label: 'ຄົນສົ່ງ',
+          },
+          {
+            key: '/admin/customers',
+            icon: () => h(UserOutlined),
+            label: 'ລູກຄ້າ',
           },
         ],
-      }
+      },
+      // Only admin can see stores menu
+      {
+        key: '/stores',
+        icon: () => h(ShopOutlined),
+        label: 'ຮ້ານຄ້າ',
+      },
+    )
+  } else {
+    // Merchant menu - Products and Orders
+    items.push(
+      {
+        key: '/products',
+        icon: () => h(AppstoreOutlined),
+        label: 'ສິນຄ້າ',
+      },
+      {
+        key: '/orders',
+        icon: () => h(ShoppingCartOutlined),
+        label: 'ຄຳສັ່ງຊື້',
+      },
     )
   }
 
-  // Common menu
+  // Settings for all users
   items.push(
-    {
-      key: '/stores',
-      icon: () => h(ShopOutlined),
-      label: 'ຮ້ານຄ້າ',
-    },
-    {
-      key: '/products',
-      icon: () => h(AppstoreOutlined),
-      label: 'ສິນຄ້າ',
-    },
-    {
-      key: '/orders',
-      icon: () => h(ShoppingCartOutlined),
-      label: 'ຄຳສັ່ງຊື້',
-    },
     {
       type: 'divider',
     },
@@ -172,4 +181,3 @@ const handleLogout = () => {
   authStore.logout()
 }
 </script>
-

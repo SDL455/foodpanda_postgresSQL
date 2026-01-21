@@ -3,6 +3,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  // Allow connections from any IP (for mobile app development)
+  devServer: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
+
   modules: [
     '@pinia/nuxt',
     '@nuxt/icon',
@@ -37,6 +43,16 @@ export default defineNuxtConfig({
     },
   },
 
+  fonts: {
+    families: [
+      {
+        name: 'Noto Sans Lao',
+        provider: 'google',
+        weights: [100, 200, 300, 400, 500, 600, 700, 800, 900],
+      },
+    ],
+  },
+
   app: {
     head: {
       title: 'Foodpanda - Admin Dashboard',
@@ -47,6 +63,9 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100;200;300;400;500;600;700;800;900&display=swap' },
       ],
     },
   },
