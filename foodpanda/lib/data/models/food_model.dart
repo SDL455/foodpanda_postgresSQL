@@ -1,3 +1,5 @@
+import '../../core/constants/api_constants.dart';
+
 class FoodModel {
   final String id;
   final String name;
@@ -35,10 +37,14 @@ class FoodModel {
   /// ຈຳນວນຂາຍທີ່ສະແດງ
   String get soldText => '$totalSold ຂາຍແລ້ວ';
 
-  /// ຮູບພາບທີ່ຈະໃຊ້ສະແດງ
+  /// ຮູບພາບທີ່ຈະໃຊ້ສະແດງ (ແປງເປັນ full URL)
   String get displayImage {
-    if (image != null && image!.isNotEmpty) return image!;
-    if (images.isNotEmpty) return images.first.url;
+    if (image != null && image!.isNotEmpty) {
+      return ApiConstants.getImageUrl(image);
+    }
+    if (images.isNotEmpty) {
+      return ApiConstants.getImageUrl(images.first.url);
+    }
     return 'https://via.placeholder.com/300x200?text=No+Image';
   }
 

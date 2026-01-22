@@ -13,25 +13,46 @@ class ApiConstants {
   // ຕັ້ງເປັນ true ຖ້າໃຊ້ device ຈິງ, false ຖ້າໃຊ້ emulator
   static const bool _useRealDevice = false;
 
-  static String get baseUrl {
+  /// Server base URL (ບໍ່ມີ /api) - ໃຊ້ສຳລັບໂຫຼດຮູບພາບ
+  static String get serverUrl {
     if (Platform.isAndroid) {
       if (_useRealDevice) {
-        // ສຳລັບ Device ຈິງ - ໃຊ້ IP ຂອງ computer
-        return 'http://$_deviceIp:3000/api';
+        return 'http://$_deviceIp:3000';
       } else {
-        // ສຳລັບ Android Emulator ໃຊ້ 10.0.2.2
-        return 'http://10.0.2.2:3000/api';
+        return 'http://10.0.2.2:3000';
       }
     } else if (Platform.isIOS) {
       if (_useRealDevice) {
-        return 'http://$_deviceIp:3000/api';
+        return 'http://$_deviceIp:3000';
       } else {
-        return 'http://localhost:3000/api';
+        return 'http://localhost:3000';
       }
     } else {
-      // Desktop/Web
-      return 'http://localhost:3000/api';
+      return 'http://localhost:3000';
     }
+  }
+
+  /// API base URL (ມີ /api)
+  static String get baseUrl => '$serverUrl/api';
+
+  /// ແປງ image URL ຈາກ relative ເປັນ absolute
+  /// ຕົວຢ່າງ: /uploads/image.jpg -> http://10.0.2.2:3000/uploads/image.jpg
+  static String getImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return 'https://via.placeholder.com/300x200?text=No+Image';
+    }
+
+    // ຖ້າເປັນ URL ເຕັມແລ້ວ (http:// ຫຼື https://) ສົ່ງກັບຄືນໂດຍຕົງ
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+
+    // ຖ້າເປັນ relative path, ເພີ່ມ server URL
+    if (imageUrl.startsWith('/')) {
+      return '$serverUrl$imageUrl';
+    }
+
+    return '$serverUrl/$imageUrl';
   }
 
   // Auth Endpoints (Mobile)

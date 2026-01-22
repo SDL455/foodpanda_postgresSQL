@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../widgets/cached_image.dart';
@@ -128,7 +129,7 @@ class ProfileView extends GetView<ProfileController> {
               child: user?.avatar != null && user!.avatar!.isNotEmpty
                   ? ClipOval(
                       child: CachedImage(
-                        imageUrl: user.avatar!,
+                        imageUrl: ApiConstants.getImageUrl(user.avatar),
                         width: 70.w,
                         height: 70.w,
                       ),

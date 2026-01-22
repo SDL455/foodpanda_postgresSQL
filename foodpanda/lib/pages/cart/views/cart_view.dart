@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/helpers.dart';
@@ -183,7 +184,7 @@ class CartView extends GetView<CartController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CachedImage(
-                    imageUrl: item.menuItem.image ?? '',
+                    imageUrl: ApiConstants.getImageUrl(item.menuItem.image),
                     width: 60.w,
                     height: 60.w,
                     borderRadius: 8.r,
