@@ -18,6 +18,10 @@ import 'package:foodpanda/pages/rider/views/rider_main_view.dart';
 import 'package:foodpanda/pages/splash/bindings/splash_binding.dart';
 import 'package:foodpanda/pages/splash/views/splash_view.dart';
 
+// Restaurant pages
+import 'package:foodpanda/pages/restaurant/bindings/restaurant_detail_binding.dart';
+import 'package:foodpanda/pages/restaurant/views/restaurant_detail_view.dart';
+
 // New pages
 import 'package:foodpanda/pages/address/bindings/address_binding.dart';
 import 'package:foodpanda/pages/address/views/address_list_view.dart';
@@ -62,6 +66,13 @@ class AppPages {
       name: AppRoutes.cart,
       page: () => const CartView(),
       binding: CartBinding(),
+    ),
+
+    // Restaurant Detail
+    GetPage(
+      name: AppRoutes.restaurantDetail,
+      page: () => const RestaurantDetailView(),
+      binding: RestaurantDetailBinding(),
     ),
 
     // Food List
