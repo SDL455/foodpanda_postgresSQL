@@ -12,6 +12,8 @@ class FoodDetailController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxInt quantity = 1.obs;
   final RxList<String> selectedVariantIds = <String>[].obs;
+  final RxBool isFavorite = false.obs;
+  final RxBool isFavoriteLoading = false.obs;
 
   // Get food from arguments or load from API
   @override
@@ -20,6 +22,7 @@ class FoodDetailController extends GetxController {
     final args = Get.arguments;
     if (args is FoodModel) {
       food.value = args;
+      isFavorite.value = args.isFavorite;
       _loadFoodDetail(args.id);
     } else if (args is String) {
       _loadFoodDetail(args);
@@ -31,6 +34,7 @@ class FoodDetailController extends GetxController {
       isLoading.value = true;
       final result = await _repository.getFoodById(id);
       food.value = result;
+      isFavorite.value = result.isFavorite;
     } catch (e) {
       LoggerService.error('Load food detail error', e);
       if (food.value == null) {
@@ -42,6 +46,38 @@ class FoodDetailController extends GetxController {
       }
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Toggle bookmark/favorite status
+  Future<void> toggleFavorite() async {
+    if (food.value == null) return;
+
+    try {
+      isFavoriteLoading.value = true;
+      final newStatus = !isFavorite.value;
+
+      // TODO: Call API to save favorite status
+      // await _repository.toggleFoodFavorite(food.value!.id, newStatus);
+
+      isFavorite.value = newStatus;
+      food.value = food.value!.copyWith(isFavorite: newStatus);
+
+      Helpers.showSnackbar(
+        title: newStatus ? 'ບັນທຶກແລ້ວ' : 'ລຶບອອກແລ້ວ',
+        message: newStatus
+            ? 'ເພີ່ມ ${food.value!.name} ໃສ່ລາຍການໂປດແລ້ວ'
+            : 'ລຶບ ${food.value!.name} ອອກຈາກລາຍການໂປດແລ້ວ',
+      );
+    } catch (e) {
+      LoggerService.error('Toggle favorite error', e);
+      Helpers.showSnackbar(
+        title: 'ເກີດຂໍ້ຜິດພາດ',
+        message: 'ບໍ່ສາມາດບັນທຶກລາຍການໂປດໄດ້',
+        isError: true,
+      );
+    } finally {
+      isFavoriteLoading.value = false;
     }
   }
 
@@ -93,9 +129,9 @@ class FoodDetailController extends GetxController {
 
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 
   Future<void> addToCart() async {

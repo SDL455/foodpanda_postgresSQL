@@ -17,6 +17,15 @@ import 'package:foodpanda/pages/rider/bindings/rider_binding.dart';
 import 'package:foodpanda/pages/rider/views/rider_main_view.dart';
 import 'package:foodpanda/pages/splash/bindings/splash_binding.dart';
 import 'package:foodpanda/pages/splash/views/splash_view.dart';
+
+// New pages
+import 'package:foodpanda/pages/address/bindings/address_binding.dart';
+import 'package:foodpanda/pages/address/views/address_list_view.dart';
+import 'package:foodpanda/pages/favorites/bindings/favorites_binding.dart';
+import 'package:foodpanda/pages/favorites/views/favorites_view.dart';
+import 'package:foodpanda/pages/notifications/bindings/notifications_binding.dart';
+import 'package:foodpanda/pages/notifications/views/notifications_view.dart';
+
 import 'package:get/get.dart';
 import 'app_routes.dart';
 
@@ -81,6 +90,27 @@ class AppPages {
       name: AppRoutes.profile,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
+    ),
+
+    // Addresses
+    GetPage(
+      name: AppRoutes.addresses,
+      page: () => const AddressListView(),
+      binding: AddressBinding(),
+    ),
+
+    // Favorites
+    GetPage(
+      name: AppRoutes.favorites,
+      page: () => const FavoritesView(),
+      binding: FavoritesBinding(),
+    ),
+
+    // Notifications
+    GetPage(
+      name: AppRoutes.notifications,
+      page: () => const NotificationsView(),
+      binding: NotificationsBinding(),
     ),
 
     // Rider Main

@@ -79,7 +79,8 @@ class FoodListView extends GetView<FoodListController> {
                 crossAxisSpacing: 12.w,
                 childAspectRatio: 0.75,
               ),
-              itemCount: controller.foods.length +
+              itemCount:
+                  controller.foods.length +
                   (controller.isLoadingMore.value ? 2 : 0),
               itemBuilder: (context, index) {
                 if (index >= controller.foods.length) {

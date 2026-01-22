@@ -50,6 +50,7 @@ class FoodDetailView extends GetView<FoodDetailController> {
                   pinned: true,
                   backgroundColor: AppColors.white,
                   leading: _buildBackButton(),
+                  actions: [_buildBookmarkButton()],
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       fit: StackFit.expand,
@@ -242,6 +243,47 @@ class FoodDetailView extends GetView<FoodDetailController> {
           onPressed: () => Get.back(),
         ),
       ),
+    );
+  }
+
+  Widget _buildBookmarkButton() {
+    return Padding(
+      padding: EdgeInsets.all(8.w),
+      child: Obx(() {
+        final isFavorite = controller.isFavorite.value;
+        final isLoading = controller.isFavoriteLoading.value;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black.withOpacity(0.1),
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: isLoading
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  )
+                : Icon(
+                    isFavorite ? Icons.bookmark : Icons.bookmark_border,
+                    color: isFavorite
+                        ? AppColors.primary
+                        : AppColors.textPrimary,
+                  ),
+            onPressed: isLoading ? null : controller.toggleFavorite,
+          ),
+        );
+      }),
     );
   }
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/repositories/profile_repository.dart';
 import '../../../core/utils/storage_service.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../core/utils/logger_service.dart';
-import '../../../core/network/api_client.dart';
-import '../../../core/constants/api_constants.dart';
+import '../../../routes/app_routes.dart';
 import '../../auth/controllers/auth_controller.dart';
 
 class ProfileController extends GetxController {
@@ -18,7 +18,7 @@ class ProfileController extends GetxController {
   final phoneController = TextEditingController();
   final avatarController = TextEditingController();
 
-  final ApiClient _apiClient = ApiClient();
+  final ProfileRepository _repository = ProfileRepository();
 
   @override
   void onInit() {
@@ -54,16 +54,17 @@ class ProfileController extends GetxController {
   Future<void> refreshUserData() async {
     try {
       isLoading.value = true;
-      final response = await _apiClient.get(ApiConstants.profile);
-
-      if (response.data['success'] == true && response.data['data'] != null) {
-        final userData = response.data['data'];
-        user.value = UserModel.fromJson(userData);
-        await StorageService.setUserData(user.value!.toJson());
-        _initFormControllers();
-      }
+      final userData = await _repository.getProfile();
+      user.value = userData;
+      await StorageService.setUserData(user.value!.toJson());
+      _initFormControllers();
     } catch (e) {
       LoggerService.error('Failed to refresh user data', e);
+      Helpers.showSnackbar(
+        title: 'ຂໍ້ຜິດພາດ',
+        message: 'ບໍ່ສາມາດໂຫຼດຂໍ້ມູນໄດ້',
+        isError: true,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -83,39 +84,21 @@ class ProfileController extends GetxController {
     try {
       isUpdating.value = true;
 
-      final response = await _apiClient.patch(
-        ApiConstants.updateProfile,
-        data: {
-          'fullName': fullNameController.text.trim(),
-          'phone': phoneController.text.trim().isNotEmpty
-              ? phoneController.text.trim()
-              : null,
-          'avatar': avatarController.text.trim().isNotEmpty
-              ? avatarController.text.trim()
-              : null,
-        },
+      final updatedUser = await _repository.updateProfile(
+        fullName: fullNameController.text.trim(),
+        phone: phoneController.text.trim().isNotEmpty
+            ? phoneController.text.trim()
+            : null,
+        avatar: avatarController.text.trim().isNotEmpty
+            ? avatarController.text.trim()
+            : null,
       );
 
-      if (response.data['success'] == true) {
-        // Update local user data
-        user.value = user.value!.copyWith(
-          fullName: fullNameController.text.trim(),
-          phone: phoneController.text.trim().isNotEmpty
-              ? phoneController.text.trim()
-              : null,
-          avatar: avatarController.text.trim().isNotEmpty
-              ? avatarController.text.trim()
-              : null,
-        );
+      user.value = updatedUser;
+      await StorageService.setUserData(user.value!.toJson());
 
-        await StorageService.setUserData(user.value!.toJson());
-
-        Helpers.showSnackbar(title: 'ສຳເລັດ', message: 'ອັບເດດໂປຣໄຟລ໌ສຳເລັດ');
-
-        Get.back();
-      } else {
-        throw Exception(response.data['message'] ?? 'ເກີດຂໍ້ຜິດພາດ');
-      }
+      Helpers.showSnackbar(title: 'ສຳເລັດ', message: 'ອັບເດດໂປຣໄຟລ໌ສຳເລັດ');
+      Get.back();
     } catch (e) {
       LoggerService.error('Failed to update profile', e);
       Helpers.showSnackbar(
@@ -153,6 +136,80 @@ class ProfileController extends GetxController {
       default:
         return user.value?.authProvider ?? '-';
     }
+  }
+
+  // Navigation methods
+  void goToAddresses() {
+    Get.toNamed(AppRoutes.addresses);
+  }
+
+  void goToOrderHistory() {
+    Get.toNamed(AppRoutes.orders);
+  }
+
+  void goToFavorites() {
+    Get.toNamed(AppRoutes.favorites);
+  }
+
+  void goToNotifications() {
+    Get.toNamed(AppRoutes.notifications);
+  }
+
+  void goToHelp() {
+    // Show help dialog or navigate to help page
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: const [
+            Icon(Icons.help_outline, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('ຊ່ວຍເຫຼືອ'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHelpItem(Icons.phone, 'ໂທຫາພວກເຮົາ', '020 12345678'),
+            const SizedBox(height: 12),
+            _buildHelpItem(Icons.email, 'ອີເມວ', 'support@foodpanda.la'),
+            const SizedBox(height: 12),
+            _buildHelpItem(Icons.language, 'ເວັບໄຊ', 'www.foodpanda.la'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('ປິດ'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpItem(IconData icon, String title, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   void logout() {

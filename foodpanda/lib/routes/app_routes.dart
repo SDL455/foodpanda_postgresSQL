@@ -34,6 +34,7 @@ abstract class AppRoutes {
   static const addresses = '/addresses';
   static const addAddress = '/add-address';
   static const favorites = '/favorites';
+  static const notifications = '/notifications';
   static const settings = '/settings';
 
   // Rider Routes

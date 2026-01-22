@@ -7,6 +7,7 @@ class FoodModel {
   final String? image;
   final bool isAvailable;
   final int totalSold;
+  final bool isFavorite;
   final FoodCategory? category;
   final FoodStore store;
   final List<FoodVariant> variants;
@@ -21,6 +22,7 @@ class FoodModel {
     this.image,
     this.isAvailable = true,
     this.totalSold = 0,
+    this.isFavorite = false,
     this.category,
     required this.store,
     this.variants = const [],
@@ -49,9 +51,9 @@ class FoodModel {
 
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 
   factory FoodModel.fromJson(Map<String, dynamic> json) {
@@ -64,14 +66,15 @@ class FoodModel {
       image: json['image'],
       isAvailable: json['is_available'] ?? true,
       totalSold: json['total_sold'] ?? 0,
+      isFavorite: json['is_favorite'] ?? json['isFavorite'] ?? false,
       category: json['category'] != null
           ? FoodCategory.fromJson(json['category'])
           : null,
       store: FoodStore.fromJson(json['store'] ?? {}),
       variants: json['variants'] != null
           ? (json['variants'] as List)
-              .map((e) => FoodVariant.fromJson(e))
-              .toList()
+                .map((e) => FoodVariant.fromJson(e))
+                .toList()
           : [],
       images: json['images'] != null
           ? (json['images'] as List).map((e) => FoodImage.fromJson(e)).toList()
@@ -89,11 +92,44 @@ class FoodModel {
       'image': image,
       'is_available': isAvailable,
       'total_sold': totalSold,
+      'is_favorite': isFavorite,
       'category': category?.toJson(),
       'store': store.toJson(),
       'variants': variants.map((e) => e.toJson()).toList(),
       'images': images.map((e) => e.toJson()).toList(),
     };
+  }
+
+  FoodModel copyWith({
+    String? id,
+    String? name,
+    String? description,
+    int? price,
+    String? currency,
+    String? image,
+    bool? isAvailable,
+    int? totalSold,
+    bool? isFavorite,
+    FoodCategory? category,
+    FoodStore? store,
+    List<FoodVariant>? variants,
+    List<FoodImage>? images,
+  }) {
+    return FoodModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      currency: currency ?? this.currency,
+      image: image ?? this.image,
+      isAvailable: isAvailable ?? this.isAvailable,
+      totalSold: totalSold ?? this.totalSold,
+      isFavorite: isFavorite ?? this.isFavorite,
+      category: category ?? this.category,
+      store: store ?? this.store,
+      variants: variants ?? this.variants,
+      images: images ?? this.images,
+    );
   }
 }
 
@@ -101,23 +137,14 @@ class FoodCategory {
   final String id;
   final String name;
 
-  FoodCategory({
-    required this.id,
-    required this.name,
-  });
+  FoodCategory({required this.id, required this.name});
 
   factory FoodCategory.fromJson(Map<String, dynamic> json) {
-    return FoodCategory(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-    );
+    return FoodCategory(id: json['id'] ?? '', name: json['name'] ?? '');
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
+    return {'id': id, 'name': name};
   }
 }
 
@@ -157,9 +184,9 @@ class FoodStore {
 
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 
   factory FoodStore.fromJson(Map<String, dynamic> json) {
@@ -214,9 +241,9 @@ class FoodVariant {
 
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 
   factory FoodVariant.fromJson(Map<String, dynamic> json) {
@@ -243,11 +270,7 @@ class FoodImage {
   final String url;
   final int sortOrder;
 
-  FoodImage({
-    required this.id,
-    required this.url,
-    this.sortOrder = 0,
-  });
+  FoodImage({required this.id, required this.url, this.sortOrder = 0});
 
   factory FoodImage.fromJson(Map<String, dynamic> json) {
     return FoodImage(
@@ -258,10 +281,6 @@ class FoodImage {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'url': url,
-      'sort_order': sortOrder,
-    };
+    return {'id': id, 'url': url, 'sort_order': sortOrder};
   }
 }
