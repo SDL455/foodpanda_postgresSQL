@@ -116,6 +116,9 @@ class AuthRepository {
   Future<void> logout() async {
     try {
       await _authProvider.logout();
+    } catch (e) {
+      // Ignore API errors during logout
+      // The important thing is to clear local auth data
     } finally {
       await StorageService.clearAuthData();
     }

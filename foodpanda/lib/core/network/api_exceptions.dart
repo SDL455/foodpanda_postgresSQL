@@ -31,11 +31,15 @@ class ApiException implements Exception {
         message = 'ຄຳຂໍຖືກຍົກເລີກ';
         break;
       case DioExceptionType.connectionError:
-        message = 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີບເວີໄດ້';
+        message = 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີບເວີໄດ້. ກະລຸນາກວດເບິ່ງວ່າ server ກຳລັງ run ຢູ່ບໍ່';
         break;
       case DioExceptionType.unknown:
-      default:
-        message = 'ເກີດຂໍ້ຜິດພາດທີ່ບໍ່ຮູ້ຈັກ';
+        // Check if it's a connection-related error
+        if (error.error != null && error.error.toString().contains('Connection')) {
+          message = 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຊີບເວີໄດ້. ກະລຸນາກວດເບິ່ງວ່າ server ກຳລັງ run ຢູ່ບໍ່';
+        } else {
+          message = 'ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່. ກະລຸນາລອງໃໝ່ອີກຄັ້ງ';
+        }
         break;
     }
 

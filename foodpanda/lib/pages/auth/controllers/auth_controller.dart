@@ -182,25 +182,20 @@ class AuthController extends GetxController {
 
   // Logout
   Future<void> logout() async {
-    try {
-      final confirm = await Helpers.showConfirmDialog(
-        title: 'ອອກຈາກລະບົບ',
-        message: 'ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການອອກຈາກລະບົບ?',
-      );
+    final confirm = await Helpers.showConfirmDialog(
+      title: 'ອອກຈາກລະບົບ',
+      message: 'ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການອອກຈາກລະບົບ?',
+    );
 
-      if (!confirm) return;
+    if (!confirm) return;
 
-      Helpers.showLoading(message: 'ກຳລັງອອກຈາກລະບົບ...');
+    Helpers.showLoading(message: 'ກຳລັງອອກຈາກລະບົບ...');
 
-      await _authRepository.logout();
-      currentUser.value = null;
+    await _authRepository.logout();
+    currentUser.value = null;
 
-      Helpers.hideLoading();
-      Get.offAllNamed(AppRoutes.login);
-    } catch (e) {
-      Helpers.hideLoading();
-      LoggerService.error('Logout error', e);
-    }
+    Helpers.hideLoading();
+    Get.offAllNamed(AppRoutes.login);
   }
 
   // Forgot password
