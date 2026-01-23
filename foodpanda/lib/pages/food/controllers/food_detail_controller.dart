@@ -4,6 +4,7 @@ import '../../../data/models/menu_item_model.dart';
 import '../../../data/models/restaurant_model.dart';
 import '../../../data/models/cart_item_model.dart';
 import '../../../data/repositories/restaurant_repository.dart';
+import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../core/utils/logger_service.dart';
 import '../../cart/controllers/cart_controller.dart';
@@ -160,6 +161,12 @@ class FoodDetailController extends GetxController {
         restaurant: restaurant,
         quantity: quantity.value,
         selectedOptions: selectedOptions.isNotEmpty ? selectedOptions : null,
+      );
+
+      // ແຈ້ງເຕືອນເພີ່ມໃສ່ກະຕ່າສຳເລັດ
+      Helpers.showSnackbar(
+        title: AppStrings.success,
+        message: '${food.value!.name} ${AppStrings.addToCartSuccess}',
       );
 
       Get.back();
