@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../core/constants/api_constants.dart';
 import '../core/constants/app_colors.dart';
 import '../data/models/category_model.dart';
 import 'cached_image.dart';
@@ -48,7 +49,7 @@ class CategoryChip extends StatelessWidget {
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10.r),
                       child: CachedImage(
-                        imageUrl: category.image!,
+                        imageUrl: ApiConstants.getImageUrl(category.image),
                         width: 40.w,
                         height: 40.w,
                       ),
@@ -88,7 +89,8 @@ class CategoryChip extends StatelessWidget {
       return Icons.coffee;
     } else if (nameLower.contains('dessert') || nameLower.contains('ຂອງຫວານ')) {
       return Icons.cake;
-    } else if (nameLower.contains('drink') || nameLower.contains('ເຄື່ອງດື່ມ')) {
+    } else if (nameLower.contains('drink') ||
+        nameLower.contains('ເຄື່ອງດື່ມ')) {
       return Icons.local_drink;
     } else if (nameLower.contains('noodle') || nameLower.contains('ເຝີ')) {
       return Icons.ramen_dining;

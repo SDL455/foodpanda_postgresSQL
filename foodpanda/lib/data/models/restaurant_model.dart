@@ -1,3 +1,5 @@
+import '../../core/constants/api_constants.dart';
+
 class RestaurantModel {
   final String id;
   final String name;
@@ -46,7 +48,15 @@ class RestaurantModel {
   });
 
   // Helper getters
-  String get displayImage => logo ?? coverImage ?? '';
+  /// ຮູບພາບທີ່ຈະໃຊ້ສະແດງ (ແປງເປັນ full URL)
+  String get displayImage {
+    final imageUrl = logo ?? coverImage;
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return 'https://via.placeholder.com/300x200?text=No+Image';
+    }
+    return ApiConstants.getImageUrl(imageUrl);
+  }
+
   bool get hasImage => logo != null || coverImage != null;
   String get deliveryTimeText =>
       '$estimatedPrepTime-${estimatedPrepTime + 10} ນາທີ';

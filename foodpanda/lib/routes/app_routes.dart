@@ -15,6 +15,10 @@ abstract class AppRoutes {
   static const restaurantDetail = '/restaurant-detail';
   static const search = '/search';
 
+  // Food
+  static const foods = '/foods';
+  static const foodDetail = '/food-detail';
+
   // Cart & Checkout
   static const cart = '/cart';
   static const checkout = '/checkout';
@@ -30,6 +34,7 @@ abstract class AppRoutes {
   static const addresses = '/addresses';
   static const addAddress = '/add-address';
   static const favorites = '/favorites';
+  static const notifications = '/notifications';
   static const settings = '/settings';
 
   // Rider Routes

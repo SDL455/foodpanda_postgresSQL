@@ -1,6 +1,7 @@
 import '../models/restaurant_model.dart';
 import '../models/menu_item_model.dart';
 import '../models/category_model.dart';
+import '../models/food_model.dart';
 import '../providers/restaurant_provider.dart';
 
 class RestaurantRepository {
@@ -88,6 +89,50 @@ class RestaurantRepository {
   Future<List<MenuItemModel>> getProductsByStore(String storeId) async {
     final data = await _provider.getProductsByStore(storeId);
     return data.map((e) => MenuItemModel.fromJson(e)).toList();
+  }
+
+  // =====================================
+  // Food/Product Methods
+  // =====================================
+
+  /// ດຶງລາຍການອາຫານທັງໝົດ ພ້ອມ pagination
+  Future<({List<FoodModel> foods, Map<String, dynamic> pagination})> getFoods({
+    int page = 1,
+    int limit = 20,
+    String? search,
+    String? categoryId,
+    String? storeId,
+    bool popular = false,
+  }) async {
+    final result = await _provider.getProducts(
+      page: page,
+      limit: limit,
+      search: search,
+      categoryId: categoryId,
+      storeId: storeId,
+      popular: popular,
+    );
+
+    final foods = (result['products'] as List)
+        .map((e) => FoodModel.fromJson(e))
+        .toList();
+
+    return (
+      foods: foods,
+      pagination: result['pagination'] as Map<String, dynamic>,
+    );
+  }
+
+  /// ດຶງອາຫານຍອດນິຍົມ
+  Future<List<FoodModel>> getPopularFoods({int limit = 10}) async {
+    final data = await _provider.getPopularProducts(limit: limit);
+    return data.map((e) => FoodModel.fromJson(e)).toList();
+  }
+
+  /// ດຶງລາຍລະອຽດອາຫານ
+  Future<FoodModel> getFoodById(String id) async {
+    final data = await _provider.getProductById(id);
+    return FoodModel.fromJson(data);
   }
 
   // =====================================

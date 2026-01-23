@@ -16,22 +16,19 @@ class RestaurantProvider {
     double? lng,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'limit': limit,
-      };
-      
+      final queryParams = <String, dynamic>{'page': page, 'limit': limit};
+
       if (search != null && search.isNotEmpty) {
         queryParams['search'] = search;
       }
       if (lat != null) queryParams['lat'] = lat;
       if (lng != null) queryParams['lng'] = lng;
-      
+
       final response = await _apiClient.get(
         ApiConstants.stores,
         queryParameters: queryParams,
       );
-      
+
       // Response format: { success: true, data: { stores: [], pagination: {} } }
       final data = response.data['data'] ?? response.data;
       return {
@@ -48,7 +45,7 @@ class RestaurantProvider {
   Future<Map<String, dynamic>> getStoreById(String id) async {
     try {
       final response = await _apiClient.get('${ApiConstants.storeDetail}$id');
-      
+
       // Response format: { success: true, data: { ...store } }
       return response.data['data'] ?? response.data;
     } on DioException catch (e) {
@@ -61,11 +58,9 @@ class RestaurantProvider {
     try {
       final response = await _apiClient.get(
         ApiConstants.stores,
-        queryParameters: {
-          'limit': limit,
-        },
+        queryParameters: {'limit': limit},
       );
-      
+
       final data = response.data['data'] ?? response.data;
       return data['stores'] ?? [];
     } on DioException catch (e) {
@@ -82,13 +77,9 @@ class RestaurantProvider {
     try {
       final response = await _apiClient.get(
         ApiConstants.stores,
-        queryParameters: {
-          'lat': latitude,
-          'lng': longitude,
-          'limit': limit,
-        },
+        queryParameters: {'lat': latitude, 'lng': longitude, 'limit': limit},
       );
-      
+
       final data = response.data['data'] ?? response.data;
       return data['stores'] ?? [];
     } on DioException catch (e) {
@@ -105,13 +96,9 @@ class RestaurantProvider {
     try {
       final response = await _apiClient.get(
         ApiConstants.stores,
-        queryParameters: {
-          'search': query,
-          'page': page,
-          'limit': limit,
-        },
+        queryParameters: {'search': query, 'page': page, 'limit': limit},
       );
-      
+
       final data = response.data['data'] ?? response.data;
       return {
         'stores': data['stores'] ?? [],
@@ -137,7 +124,7 @@ class RestaurantProvider {
     try {
       final storeData = await getStoreById(storeId);
       final categories = storeData['categories'] as List? ?? [];
-      
+
       // Flatten all products from all categories
       final products = <dynamic>[];
       for (final category in categories) {
@@ -150,7 +137,7 @@ class RestaurantProvider {
           });
         }
       }
-      
+
       return products;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -168,9 +155,67 @@ class RestaurantProvider {
   }
 
   // =====================================
+  // Product/Food Methods
+  // =====================================
+
+  /// ດຶງລາຍການອາຫານ/ສິນຄ້າທັງໝົດ
+  Future<Map<String, dynamic>> getProducts({
+    int page = 1,
+    int limit = 20,
+    String? search,
+    String? categoryId,
+    String? storeId,
+    bool popular = false,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{'page': page, 'limit': limit};
+
+      if (search != null && search.isNotEmpty) {
+        queryParams['search'] = search;
+      }
+      if (categoryId != null) queryParams['categoryId'] = categoryId;
+      if (storeId != null) queryParams['storeId'] = storeId;
+      if (popular) queryParams['popular'] = 'true';
+
+      final response = await _apiClient.get(
+        ApiConstants.products,
+        queryParameters: queryParams,
+      );
+
+      final data = response.data['data'] ?? response.data;
+      return {
+        'products': data['products'] ?? [],
+        'pagination': data['pagination'] ?? {},
+      };
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  /// ດຶງອາຫານຍອດນິຍົມ
+  Future<List<dynamic>> getPopularProducts({int limit = 10}) async {
+    try {
+      final result = await getProducts(limit: limit, popular: true);
+      return result['products'] ?? [];
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  /// ດຶງລາຍລະອຽດອາຫານ
+  Future<Map<String, dynamic>> getProductById(String id) async {
+    try {
+      final response = await _apiClient.get('${ApiConstants.productDetail}$id');
+      return response.data['data'] ?? response.data;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  // =====================================
   // Legacy methods for backward compatibility
   // =====================================
-  
+
   @Deprecated('Use getStores() instead')
   Future<List<dynamic>> getRestaurants({int page = 1, int limit = 20}) async {
     final result = await getStores(page: page, limit: limit);
