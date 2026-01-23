@@ -5,13 +5,13 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../routes/app_routes.dart';
 import '../controllers/home_controller.dart';
-import 'home_app_bar.dart';
-import 'home_promo_banners.dart';
-import 'home_quick_categories.dart';
-import 'home_section.dart';
-import 'home_featured_restaurants.dart';
-import 'home_all_foods.dart';
-import 'home_shimmer_loading.dart';
+import '../widgets/home_app_bar.dart';
+import '../widgets/home_promo_banners.dart';
+import '../widgets/home_quick_categories.dart';
+import '../widgets/home_section.dart';
+import '../widgets/home_featured_restaurants.dart';
+import '../widgets/home_all_foods.dart';
+import '../widgets/home_shimmer_loading.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});

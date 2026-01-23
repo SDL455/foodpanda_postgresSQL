@@ -1,8 +1,12 @@
 import 'package:get/get.dart';
 import '../../../data/models/food_model.dart';
+import '../../../data/models/menu_item_model.dart';
+import '../../../data/models/restaurant_model.dart';
+import '../../../data/models/cart_item_model.dart';
 import '../../../data/repositories/restaurant_repository.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../core/utils/logger_service.dart';
+import '../../cart/controllers/cart_controller.dart';
 
 class FoodDetailController extends GetxController {
   final RestaurantRepository _repository = RestaurantRepository();
@@ -137,11 +141,97 @@ class FoodDetailController extends GetxController {
   Future<void> addToCart() async {
     if (food.value == null) return;
 
-    // TODO: Implement add to cart functionality
-    Helpers.showSnackbar(
-      title: 'ສຳເລັດ',
-      message: 'ເພີ່ມ ${food.value!.name} ໃສ່ກະຕ່າແລ້ວ',
+    try {
+      // Get CartController
+      final cartController = Get.find<CartController>();
+
+      // Convert FoodModel to MenuItemModel
+      final menuItem = _convertToMenuItem(food.value!);
+
+      // Convert FoodStore to RestaurantModel
+      final restaurant = _convertToRestaurant(food.value!.store);
+
+      // Convert selected variants to SelectedOptions
+      final selectedOptions = _getSelectedOptions();
+
+      // Add to cart
+      cartController.addToCart(
+        menuItem: menuItem,
+        restaurant: restaurant,
+        quantity: quantity.value,
+        selectedOptions: selectedOptions.isNotEmpty ? selectedOptions : null,
+      );
+
+      Get.back();
+    } catch (e) {
+      LoggerService.error('Add to cart error', e);
+      Helpers.showSnackbar(
+        title: 'ເກີດຂໍ້ຜິດພາດ',
+        message: 'ບໍ່ສາມາດເພີ່ມໃສ່ກະຕ່າໄດ້',
+        isError: true,
+      );
+    }
+  }
+
+  /// Convert FoodModel to MenuItemModel
+  MenuItemModel _convertToMenuItem(FoodModel foodItem) {
+    return MenuItemModel(
+      id: foodItem.id,
+      restaurantId: foodItem.store.id,
+      name: foodItem.name,
+      description: foodItem.description,
+      image: foodItem.image,
+      price: foodItem.price.toDouble(),
+      isAvailable: foodItem.isAvailable,
     );
-    Get.back();
+  }
+
+  /// Convert FoodStore to RestaurantModel
+  RestaurantModel _convertToRestaurant(FoodStore store) {
+    return RestaurantModel(
+      id: store.id,
+      name: store.name,
+      logo: store.logo,
+      coverImage: store.coverImage,
+      rating: store.rating,
+      deliveryFee: store.deliveryFee,
+      estimatedPrepTime: store.estimatedPrepTime,
+      minOrderAmount: store.minOrderAmount ?? 0,
+      address: store.address,
+      openTime: store.openTime,
+      closeTime: store.closeTime,
+    );
+  }
+
+  /// Get selected options from selected variants
+  List<SelectedOption> _getSelectedOptions() {
+    if (food.value == null || selectedVariantIds.isEmpty) {
+      return [];
+    }
+
+    final List<SelectedOption> options = [];
+
+    for (final variantId in selectedVariantIds) {
+      final variant = food.value!.variants.firstWhereOrNull(
+        (v) => v.id == variantId,
+      );
+      if (variant != null) {
+        options.add(
+          SelectedOption(
+            optionId: variant.id,
+            optionName: variant.name,
+            selectedItems: [
+              OptionItem(
+                id: variant.id,
+                name: variant.name,
+                price: variant.priceDelta.toDouble(),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    return options;
   }
 }

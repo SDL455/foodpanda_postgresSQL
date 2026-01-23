@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/restaurant_detail_controller.dart';
-import 'restaurant_detail_app_bar.dart';
-import 'restaurant_detail_info.dart';
-import 'restaurant_detail_categories.dart';
-import 'restaurant_detail_food_list.dart';
+import '../widgets/restaurant_detail_app_bar.dart';
+import '../widgets/restaurant_detail_info.dart';
+import '../widgets/restaurant_detail_categories.dart';
+import '../widgets/restaurant_detail_food_list.dart';
 
 class RestaurantDetailView extends GetView<RestaurantDetailController> {
   const RestaurantDetailView({super.key});

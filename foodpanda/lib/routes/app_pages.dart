@@ -3,6 +3,8 @@ import 'package:foodpanda/pages/auth/views/login_view.dart';
 import 'package:foodpanda/pages/auth/views/register_view.dart';
 import 'package:foodpanda/pages/cart/bindings/cart_binding.dart';
 import 'package:foodpanda/pages/cart/views/cart_view.dart';
+import 'package:foodpanda/pages/checkout/bindings/checkout_binding.dart';
+import 'package:foodpanda/pages/checkout/views/checkout_view.dart';
 import 'package:foodpanda/pages/food/bindings/food_detail_binding.dart';
 import 'package:foodpanda/pages/food/bindings/food_list_binding.dart';
 import 'package:foodpanda/pages/food/views/food_detail_view.dart';
@@ -66,6 +68,13 @@ class AppPages {
       name: AppRoutes.cart,
       page: () => const CartView(),
       binding: CartBinding(),
+    ),
+
+    // Checkout
+    GetPage(
+      name: AppRoutes.checkout,
+      page: () => const CheckoutView(),
+      binding: CheckoutBinding(),
     ),
 
     // Restaurant Detail

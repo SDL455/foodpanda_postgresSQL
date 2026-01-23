@@ -4,6 +4,12 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../controllers/food_detail_controller.dart';
+import '../widgets/food_detail_back_button.dart';
+import '../widgets/food_detail_bookmark_button.dart';
+import '../widgets/food_detail_bottom_button.dart';
+import '../widgets/food_quantity_selector.dart';
+import '../widgets/food_store_info_card.dart';
+import '../widgets/food_variant_item.dart';
 
 class FoodDetailView extends GetView<FoodDetailController> {
   const FoodDetailView({super.key});
@@ -49,8 +55,8 @@ class FoodDetailView extends GetView<FoodDetailController> {
                   expandedHeight: 280.h,
                   pinned: true,
                   backgroundColor: AppColors.white,
-                  leading: _buildBackButton(),
-                  actions: [_buildBookmarkButton()],
+                  leading: const FoodDetailBackButton(),
+                  actions: const [FoodDetailBookmarkButton()],
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       fit: StackFit.expand,
@@ -102,60 +108,16 @@ class FoodDetailView extends GetView<FoodDetailController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Food Name & Price
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      food.name,
-                                      style: TextStyle(
-                                        fontSize: 22.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    if (food.category != null) ...[
-                                      SizedBox(height: 4.h),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 8.w,
-                                          vertical: 4.h,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryLight,
-                                          borderRadius: BorderRadius.circular(
-                                            6.r,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          food.category!.name,
-                                          style: TextStyle(
-                                            fontSize: 11.sp,
-                                            color: AppColors.primary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                food.priceText,
-                                style: TextStyle(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
+                          _buildFoodHeader(food),
                           SizedBox(height: 16.h),
                           // Store Info
-                          _buildStoreInfo(food),
+                          FoodStoreInfoCard(
+                            food: food,
+                            onTap: () {
+                              // Navigate to store detail
+                              // Get.toNamed(AppRoutes.restaurantDetail, arguments: food.store);
+                            },
+                          ),
                           SizedBox(height: 20.h),
                           // Description
                           if (food.description != null &&
@@ -191,7 +153,16 @@ class FoodDetailView extends GetView<FoodDetailController> {
                             ),
                             SizedBox(height: 12.h),
                             ...food.availableVariants.map(
-                              (variant) => _buildVariantItem(variant),
+                              (variant) => Obx(
+                                () => FoodVariantItem(
+                                  variant: variant,
+                                  isSelected: controller.isVariantSelected(
+                                    variant.id,
+                                  ),
+                                  onTap: () =>
+                                      controller.toggleVariant(variant.id),
+                                ),
+                              ),
                             ),
                             SizedBox(height: 20.h),
                           ],
@@ -205,7 +176,7 @@ class FoodDetailView extends GetView<FoodDetailController> {
                             ),
                           ),
                           SizedBox(height: 12.h),
-                          _buildQuantitySelector(),
+                          const FoodQuantitySelector(),
                           SizedBox(height: 100.h),
                         ],
                       ),
@@ -215,11 +186,11 @@ class FoodDetailView extends GetView<FoodDetailController> {
               ],
             ),
             // Bottom Add to Cart Button
-            Positioned(
+            const Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              child: _buildBottomButton(),
+              child: FoodDetailBottomButton(),
             ),
           ],
         );
@@ -227,317 +198,54 @@ class FoodDetailView extends GetView<FoodDetailController> {
     );
   }
 
-  Widget _buildBackButton() {
-    return Padding(
-      padding: EdgeInsets.all(8.w),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(color: AppColors.black.withOpacity(0.1), blurRadius: 10),
-          ],
-        ),
-        child: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.back(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBookmarkButton() {
-    return Padding(
-      padding: EdgeInsets.all(8.w),
-      child: Obx(() {
-        final isFavorite = controller.isFavorite.value;
-        final isLoading = controller.isFavoriteLoading.value;
-
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.black.withOpacity(0.1),
-                blurRadius: 10,
-              ),
-            ],
-          ),
-          child: IconButton(
-            icon: isLoading
-                ? SizedBox(
-                    width: 20.w,
-                    height: 20.w,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primary,
-                    ),
-                  )
-                : Icon(
-                    isFavorite ? Icons.bookmark : Icons.bookmark_border,
-                    color: isFavorite
-                        ? AppColors.primary
-                        : AppColors.textPrimary,
-                  ),
-            onPressed: isLoading ? null : controller.toggleFavorite,
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildStoreInfo(food) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to store detail
-        // Get.toNamed(AppRoutes.restaurantDetail, arguments: food.store);
-      },
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: AppColors.grey100,
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        child: Row(
-          children: [
-            // Store Logo
-            Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10.r),
-                child: food.store.logo != null
-                    ? Image.network(
-                        food.store.logo!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Icon(
-                          Icons.store,
-                          color: AppColors.primary,
-                          size: 24.sp,
-                        ),
-                      )
-                    : Icon(Icons.store, color: AppColors.primary, size: 24.sp),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            // Store Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${AppStrings.fromStore}:',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    food.store.name,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.star,
-                        color: AppColors.ratingActive,
-                        size: 14.sp,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        food.store.rating.toStringAsFixed(1),
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Icon(
-                        Icons.access_time,
-                        color: AppColors.grey500,
-                        size: 14.sp,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        food.store.prepTimeText,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: AppColors.grey400, size: 24.sp),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVariantItem(variant) {
-    return Obx(() {
-      final isSelected = controller.isVariantSelected(variant.id);
-      return GestureDetector(
-        onTap: () => controller.toggleVariant(variant.id),
-        child: Container(
-          margin: EdgeInsets.only(bottom: 8.h),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryLight : AppColors.white,
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.grey300,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Row(
+  /// Food header with name, category, and price
+  /// ບໍ່ແຍກເປັນ widget ເພາະມັນເປັນ UI ທີ່ສະເພາະຂອງໜ້ານີ້ ແລະ ບໍ່ໄດ້ reuse
+  Widget _buildFoodHeader(food) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 22.w,
-                height: 22.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected ? AppColors.primary : AppColors.white,
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.grey400,
-                    width: 2,
-                  ),
-                ),
-                child: isSelected
-                    ? Icon(Icons.check, color: AppColors.white, size: 14.sp)
-                    : null,
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Text(
-                  variant.name,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              if (variant.priceDelta > 0)
-                Text(
-                  variant.priceDeltaText,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.primary,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget _buildQuantitySelector() {
-    return Obx(
-      () => Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-        decoration: BoxDecoration(
-          color: AppColors.grey100,
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              onPressed: controller.decrementQuantity,
-              icon: Icon(
-                Icons.remove,
-                color: controller.quantity.value > 1
-                    ? AppColors.primary
-                    : AppColors.grey400,
-              ),
-            ),
-            Container(
-              width: 48.w,
-              alignment: Alignment.center,
-              child: Text(
-                controller.quantity.value.toString(),
+              Text(
+                food.name,
                 style: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 22.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: controller.incrementQuantity,
-              icon: Icon(Icons.add, color: AppColors.primary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomButton() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Obx(
-          () => ElevatedButton(
-            onPressed: controller.addToCart,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              elevation: 0,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.shopping_cart_outlined, size: 20.sp),
-                SizedBox(width: 8.w),
-                Text(
-                  '${AppStrings.addToCart} - ${controller.totalPriceText}',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
+              if (food.category != null) ...[
+                SizedBox(height: 4.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Text(
+                    food.category!.name,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
         ),
-      ),
+        Text(
+          food.priceText,
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
+      ],
     );
   }
 }

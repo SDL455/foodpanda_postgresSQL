@@ -64,6 +64,30 @@ class AppStrings {
   static const String checkout = 'ຊຳລະເງິນ';
   static const String clearCart = 'ລຶບທັງໝົດ';
 
+  // Checkout
+  static const String deliveryAddress = 'ທີ່ຢູ່ສົ່ງ';
+  static const String changeAddress = 'ປ່ຽນ';
+  static const String addDeliveryAddress = 'ເພີ່ມທີ່ຢູ່ສົ່ງ';
+  static const String selectDeliveryAddress = 'ເລືອກທີ່ຢູ່ສົ່ງ';
+  static const String noSavedAddresses = 'ບໍ່ມີທີ່ຢູ່ທີ່ບັນທຶກໄວ້';
+  static const String paymentMethod = 'ວິທີຊຳລະເງິນ';
+  static const String cash = 'ເງິນສົດ';
+  static const String cashOnDelivery = 'ຈ່າຍເງິນສົດເມື່ອຮັບອາຫານ';
+  static const String priceSummary = 'ສະຫຼຸບລາຄາ';
+  static const String free = 'ຟຣີ';
+  static const String placeOrder = 'ສັ່ງອາຫານ';
+  static const String orderNote = 'ໝາຍເຫດ';
+  static const String orderNotePlaceholder =
+      'ເພີ່ມໝາຍເຫດສຳລັບຄຳສັ່ງຊື້ (ທາງເລືອກ)';
+  static const String securePayment = 'ການຊຳລະເງິນປອດໄພ';
+  static const String payWith = 'ຊຳລະດ້ວຍ';
+  static const String orderSuccess = 'ສັ່ງອາຫານສຳເລັດແລ້ວ';
+  static const String selectAddressError = 'ກະລຸນາເລືອກທີ່ຢູ່ສົ່ງ';
+  static const String emptyCartError = 'ກະຕ່າຫວ່າງເປົ່າ';
+  static const String noRestaurantError = 'ບໍ່ພົບຂໍ້ມູນຮ້ານ';
+  static const String defaultAddress = 'ຫຼັກ';
+  static const String addNewAddress = 'ເພີ່ມທີ່ຢູ່ໃໝ່';
+
   // Order
   static const String orders = 'ຄຳສັ່ງຊື້';
   static const String orderHistory = 'ປະຫວັດການສັ່ງຊື້';
