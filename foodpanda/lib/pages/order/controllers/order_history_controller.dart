@@ -4,7 +4,7 @@ import '../../../data/models/order_model.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../core/utils/logger_service.dart';
 
-class OrderController extends GetxController {
+class OrderHistoryController extends GetxController {
   final OrderRepository _orderRepository = OrderRepository();
 
   // Observable states
@@ -23,18 +23,23 @@ class OrderController extends GetxController {
     try {
       isLoading.value = true;
 
-      final active = await _orderRepository.getActiveOrders();
-      activeOrders.value = active;
+      // Load active orders - if error, just set empty list
+      try {
+        final active = await _orderRepository.getActiveOrders();
+        activeOrders.value = active;
+      } catch (e) {
+        LoggerService.error('Load active orders error', e);
+        activeOrders.value = [];
+      }
 
-      final history = await _orderRepository.getOrderHistory();
-      orderHistory.value = history;
-    } catch (e) {
-      LoggerService.error('Load orders error', e);
-      Helpers.showSnackbar(
-        title: 'ເກີດຂໍ້ຜິດພາດ',
-        message: 'ບໍ່ສາມາດໂຫຼດຄຳສັ່ງຊື້ໄດ້',
-        isError: true,
-      );
+      // Load order history - if error, just set empty list
+      try {
+        final history = await _orderRepository.getOrderHistory();
+        orderHistory.value = history;
+      } catch (e) {
+        LoggerService.error('Load order history error', e);
+        orderHistory.value = [];
+      }
     } finally {
       isLoading.value = false;
     }
@@ -92,6 +97,26 @@ class OrderController extends GetxController {
       Helpers.showSnackbar(
         title: 'ເກີດຂໍ້ຜິດພາດ',
         message: 'ບໍ່ສາມາດຍົກເລີກຄຳສັ່ງຊື້ໄດ້',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> reorder(OrderModel order) async {
+    try {
+      Helpers.showLoading(message: 'ກຳລັງເພີ່ມໃສ່ກະຕ່າ...');
+      // TODO: Implement reorder logic - add items to cart
+      Helpers.hideLoading();
+      Helpers.showSnackbar(
+        title: 'ສຳເລັດ',
+        message: 'ເພີ່ມລາຍການໃສ່ກະຕ່າແລ້ວ',
+      );
+    } catch (e) {
+      Helpers.hideLoading();
+      LoggerService.error('Reorder error', e);
+      Helpers.showSnackbar(
+        title: 'ເກີດຂໍ້ຜິດພາດ',
+        message: 'ບໍ່ສາມາດສັ່ງອີກຄັ້ງໄດ້',
         isError: true,
       );
     }

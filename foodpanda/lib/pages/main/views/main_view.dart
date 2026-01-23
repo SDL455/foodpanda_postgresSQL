@@ -6,7 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../home/views/home_view.dart';
 import '../../cart/views/cart_view.dart';
-import '../../order/views/order_list_view.dart';
+import '../../order/views/order_history_view.dart';
 import '../../profile/views/profile_view.dart';
 import '../controllers/main_controller.dart';
 
@@ -22,7 +22,7 @@ class MainView extends GetView<MainController> {
         children: const [
           HomeView(),
           CartView(),
-          OrderListView(),
+          OrderHistoryView(),
           ProfileView(),
         ],
       ),
@@ -65,7 +65,7 @@ class MainView extends GetView<MainController> {
                 index: 2,
                 icon: Icons.receipt_long_outlined,
                 activeIcon: Icons.receipt_long,
-                label: AppStrings.orders,
+                label: AppStrings.historyOrders,
               ),
               _buildNavItem(
                 index: 3,

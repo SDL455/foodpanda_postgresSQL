@@ -55,7 +55,11 @@ class OrderProvider {
   Future<List<dynamic>> getActiveOrders() async {
     try {
       final response = await _apiClient.get(ApiConstants.activeOrders);
-      return response.data['data'] ?? [];
+      final data = response.data;
+      if (data is Map && data['data'] != null) {
+        return data['data'] as List<dynamic>;
+      }
+      return [];
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -73,7 +77,11 @@ class OrderProvider {
           'limit': limit,
         },
       );
-      return response.data['data'] ?? [];
+      final data = response.data;
+      if (data is Map && data['data'] != null) {
+        return data['data'] as List<dynamic>;
+      }
+      return [];
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
