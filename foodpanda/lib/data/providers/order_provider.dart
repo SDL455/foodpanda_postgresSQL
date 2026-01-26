@@ -168,12 +168,19 @@ class OrderProvider {
 
   Future<void> cancelOrder(String id, {String? reason}) async {
     try {
+      // Build request data, only include reason if it's not null
+      final Map<String, dynamic> requestData = {
+        'order_id': id,
+      };
+      
+      // Only add reason if it has a value
+      if (reason != null && reason.isNotEmpty) {
+        requestData['reason'] = reason;
+      }
+
       await _apiClient.post(
         ApiConstants.cancelOrder,
-        data: {
-          'order_id': id,
-          'reason': reason,
-        },
+        data: requestData,
       );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
