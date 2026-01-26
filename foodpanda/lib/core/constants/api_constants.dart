@@ -97,11 +97,11 @@ class ApiConstants {
   // Order Endpoints
   static const String orders = '/mobile/orders';
   static const String createOrder = '/mobile/orders';
-  static const String orderDetail = '/orders/'; // + id
-  static const String activeOrders = '/orders?status=active';
-  static const String orderHistory = '/orders?status=history';
-  static const String cancelOrder = '/orders/cancel';
-  static const String trackOrder = '/orders/'; // + id
+  static const String orderDetail = '/mobile/orders/'; // + id
+  static const String activeOrders = '/mobile/orders?status=active';
+  static const String orderHistory = '/mobile/orders?status=history';
+  static const String cancelOrder = '/mobile/orders/cancel';
+  static const String trackOrder = '/mobile/orders/'; // + id
 
   // Payment Endpoints
   static const String paymentMethods = '/payments/methods';

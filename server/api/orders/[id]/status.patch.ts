@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import prisma from '../../../utils/prisma'
 import { successResponse, errorResponse, unauthorizedResponse, forbiddenResponse, notFoundResponse } from '../../../utils/response'
-import { notifyCustomerOrderStatus } from '../../../services/notification'
+import { notifyCustomerOrderStatus, notifyAllAvailableRiders } from '../../../services/notification'
 import type { NotificationType } from '@prisma/client'
 
 const updateStatusSchema = z.object({
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
   const result = updateStatusSchema.safeParse(body)
   
   if (!result.success) {
-    return errorResponse(result.error.errors[0].message)
+    return errorResponse(result.error.issues[0]?.message ?? 'ຂໍ້ມູນບໍ່ຖືກຕ້ອງ')
   }
   
   const { status, cancelReason } = result.data
@@ -96,13 +96,24 @@ export default defineEventHandler(async (event) => {
     },
   })
   
-  // Send notification to customer
+  // Send notifications
   try {
     const notificationType = statusToNotificationType[status]
     if (notificationType) {
+      // Notify customer about order status change
       await notifyCustomerOrderStatus(id, notificationType, {
         reason: cancelReason,
       })
+    }
+
+    // Notify riders when store confirms order (CONFIRMED status)
+    if (status === 'CONFIRMED') {
+      await notifyAllAvailableRiders(id)
+    }
+
+    // Notify riders when order is ready for pickup (READY_FOR_PICKUP status)
+    if (status === 'READY_FOR_PICKUP') {
+      await notifyAllAvailableRiders(id)
     }
   } catch (error) {
     console.error('Failed to send notification:', error)

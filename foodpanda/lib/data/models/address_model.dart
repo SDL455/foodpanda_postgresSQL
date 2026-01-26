@@ -22,13 +22,13 @@ class AddressModel {
   factory AddressModel.fromJson(Map<String, dynamic> json) {
     return AddressModel(
       id: json['id'] ?? '',
-      userId: json['user_id'] ?? '',
+      userId: json['user_id'] ?? json['customerId'] ?? '',
       label: json['label'] ?? '',
       address: json['address'] ?? '',
-      detail: json['detail'],
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
-      isDefault: json['is_default'] ?? false,
+      detail: json['detail'] ?? json['note'],
+      latitude: (json['latitude'] ?? json['lat'] ?? 0).toDouble(),
+      longitude: (json['longitude'] ?? json['lng'] ?? 0).toDouble(),
+      isDefault: json['is_default'] ?? json['isDefault'] ?? false,
     );
   }
 

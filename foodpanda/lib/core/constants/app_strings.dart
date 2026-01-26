@@ -89,7 +89,7 @@ class AppStrings {
   static const String addNewAddress = 'ເພີ່ມທີ່ຢູ່ໃໝ່';
 
   // Order
-  static const String orders = 'ຄຳສັ່ງຊື້';
+  static const String historyOrders = 'ປະຫວັດການສັ່ງຊື້';
   static const String orderHistory = 'ປະຫວັດການສັ່ງຊື້';
   static const String activeOrders = 'ຄຳສັ່ງຊື້ທີ່ກຳລັງດຳເນີນ';
   static const String orderPlaced = 'ສັ່ງຊື້ແລ້ວ';

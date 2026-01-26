@@ -86,38 +86,146 @@ class OrderModel {
       status != OrderStatus.delivered && status != OrderStatus.cancelled;
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    // Handle both camelCase (from server) and snake_case formats
+    final userId = json['customerId'] ?? json['user_id'] ?? '';
+    final storeData = json['store'] ?? json['restaurant'];
+    final statusStr = (json['status'] as String?)?.toUpperCase() ?? 'PENDING';
+
+    // Map server status to OrderStatus enum
+    OrderStatus orderStatus;
+    switch (statusStr) {
+      case 'PENDING':
+        orderStatus = OrderStatus.pending;
+        break;
+      case 'CONFIRMED':
+        orderStatus = OrderStatus.confirmed;
+        break;
+      case 'PREPARING':
+        orderStatus = OrderStatus.preparing;
+        break;
+      case 'READY_FOR_PICKUP':
+      case 'READY':
+        orderStatus = OrderStatus.ready;
+        break;
+      case 'PICKED_UP':
+      case 'DELIVERING':
+      case 'ON_THE_WAY':
+        orderStatus = OrderStatus.onTheWay;
+        break;
+      case 'DELIVERED':
+        orderStatus = OrderStatus.delivered;
+        break;
+      case 'CANCELLED':
+        orderStatus = OrderStatus.cancelled;
+        break;
+      default:
+        orderStatus = OrderStatus.pending;
+    }
+
+    // Parse items - transform server format to CartItemModel format
+    List<dynamic> itemsList = [];
+    if (json['items'] != null && json['items'] is List) {
+      itemsList = (json['items'] as List).map((item) {
+        if (item is Map) {
+          // If it's already in CartItemModel format, return as is
+          if (item.containsKey('menu_item')) {
+            return item;
+          }
+          // Transform server order item format to CartItemModel format
+          final variants = item['variants'] as List? ?? [];
+          final selectedOptions = <Map<String, dynamic>>[];
+
+          // Group variants by option (if needed) or create a simple structure
+          if (variants.isNotEmpty) {
+            selectedOptions.add({
+              'option_id': 'variants',
+              'option_name': 'Variants',
+              'selected_items': variants
+                  .map<Map<String, dynamic>>(
+                    (v) => {
+                      'id': v['variantId'] ?? v['variant_id'],
+                      'name': v['variantName'] ?? v['variant_name'],
+                      'price':
+                          ((v['priceDelta'] ?? v['price_delta'] ?? 0) as num)
+                              .toDouble(),
+                    },
+                  )
+                  .toList(),
+            });
+          }
+
+          return {
+            'id': item['id'] ?? item['productId'] ?? '',
+            'menu_item': {
+              'id': item['productId'] ?? item['product_id'] ?? '',
+              'name': item['productName'] ?? item['product_name'] ?? '',
+              'image': item['productImage'] ?? item['product_image'],
+              'price': ((item['unitPrice'] ?? item['unit_price'] ?? 0) as num)
+                  .toDouble(),
+            },
+            'quantity': item['quantity'] ?? 1,
+            'selected_options': selectedOptions,
+            'note': item['note'],
+          };
+        }
+        return item;
+      }).toList();
+    }
+
+    // Parse dates - handle both formats
+    DateTime? parseDate(dynamic dateValue) {
+      if (dateValue == null) return null;
+      if (dateValue is String) {
+        try {
+          return DateTime.parse(dateValue);
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
+
     return OrderModel(
       id: json['id'] ?? '',
-      userId: json['user_id'] ?? '',
-      restaurant: RestaurantModel.fromJson(json['restaurant']),
-      items: (json['items'] as List)
-          .map((e) => CartItemModel.fromJson(e))
+      userId: userId,
+      restaurant: RestaurantModel.fromJson(storeData ?? {}),
+      items: itemsList
+          .map(
+            (e) => CartItemModel.fromJson(
+              e is Map ? Map<String, dynamic>.from(e) : <String, dynamic>{},
+            ),
+          )
           .toList(),
-      subtotal: (json['subtotal'] ?? 0).toDouble(),
-      deliveryFee: (json['delivery_fee'] ?? 0).toDouble(),
-      discount: (json['discount'] ?? 0).toDouble(),
-      total: (json['total'] ?? 0).toDouble(),
-      status: OrderStatus.values.firstWhere(
-        (e) => e.name == json['status'],
-        orElse: () => OrderStatus.pending,
+      subtotal: ((json['subtotal'] ?? 0) as num).toDouble(),
+      deliveryFee: ((json['deliveryFee'] ?? json['delivery_fee'] ?? 0) as num)
+          .toDouble(),
+      discount: ((json['discount'] ?? 0) as num).toDouble(),
+      total: ((json['total'] ?? 0) as num).toDouble(),
+      status: orderStatus,
+      deliveryAddress:
+          json['deliveryAddress'] ?? json['delivery_address'] ?? '',
+      deliveryLatitude: (json['deliveryLat'] ?? json['delivery_latitude'])
+          ?.toDouble(),
+      deliveryLongitude: (json['deliveryLng'] ?? json['delivery_longitude'])
+          ?.toDouble(),
+      paymentMethod: json['paymentMethod'] ?? json['payment_method'],
+      isPaid: json['paymentStatus'] == 'PAID' || json['is_paid'] == true,
+      note: json['deliveryNote'] ?? json['note'],
+      driverName:
+          json['delivery']?['rider']?['fullName'] ?? json['driver_name'],
+      driverPhone: json['delivery']?['rider']?['phone'] ?? json['driver_phone'],
+      driverLatitude:
+          json['delivery']?['rider']?['currentLat']?.toDouble() ??
+          json['driver_latitude']?.toDouble(),
+      driverLongitude:
+          json['delivery']?['rider']?['currentLng']?.toDouble() ??
+          json['driver_longitude']?.toDouble(),
+      createdAt:
+          parseDate(json['createdAt'] ?? json['created_at']) ?? DateTime.now(),
+      estimatedDelivery: parseDate(
+        json['estimatedDelivery'] ?? json['estimated_delivery'],
       ),
-      deliveryAddress: json['delivery_address'] ?? '',
-      deliveryLatitude: json['delivery_latitude']?.toDouble(),
-      deliveryLongitude: json['delivery_longitude']?.toDouble(),
-      paymentMethod: json['payment_method'],
-      isPaid: json['is_paid'] ?? false,
-      note: json['note'],
-      driverName: json['driver_name'],
-      driverPhone: json['driver_phone'],
-      driverLatitude: json['driver_latitude']?.toDouble(),
-      driverLongitude: json['driver_longitude']?.toDouble(),
-      createdAt: DateTime.parse(json['created_at']),
-      estimatedDelivery: json['estimated_delivery'] != null
-          ? DateTime.parse(json['estimated_delivery'])
-          : null,
-      deliveredAt: json['delivered_at'] != null
-          ? DateTime.parse(json['delivered_at'])
-          : null,
+      deliveredAt: parseDate(json['deliveredAt'] ?? json['delivered_at']),
     );
   }
 

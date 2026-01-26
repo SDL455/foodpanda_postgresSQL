@@ -11,8 +11,8 @@ import 'package:foodpanda/pages/food/views/food_detail_view.dart';
 import 'package:foodpanda/pages/food/views/food_list_view.dart';
 import 'package:foodpanda/pages/main/bindings/main_binding.dart';
 import 'package:foodpanda/pages/main/views/main_view.dart';
-import 'package:foodpanda/pages/order/bindings/order_binding.dart';
-import 'package:foodpanda/pages/order/views/order_list_view.dart';
+import 'package:foodpanda/pages/order/bindings/order_history_binding.dart';
+import 'package:foodpanda/pages/order/views/order_history_view.dart';
 import 'package:foodpanda/pages/profile/bindings/profile_binding.dart';
 import 'package:foodpanda/pages/profile/views/profile_view.dart';
 import 'package:foodpanda/pages/rider/bindings/rider_binding.dart';
@@ -101,8 +101,8 @@ class AppPages {
     // Orders
     GetPage(
       name: AppRoutes.orders,
-      page: () => const OrderListView(),
-      binding: OrderBinding(),
+      page: () => const OrderHistoryView(),
+      binding: OrderHistoryBinding(),
     ),
 
     // Profile

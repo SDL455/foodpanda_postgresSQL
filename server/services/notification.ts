@@ -251,6 +251,12 @@ export async function notifyStoreNewOrder(orderId: string) {
     throw new Error('Order not found')
   }
 
+  // Check if merchant exists and has users
+  if (!order.store.merchant || !order.store.merchant.users || order.store.merchant.users.length === 0) {
+    console.warn(`No active merchant users found for order ${orderId}`)
+    return []
+  }
+
   // Notify all merchant users
   const notifications = await Promise.all(
     order.store.merchant.users.map((user) =>
@@ -296,6 +302,54 @@ export async function notifyRiderNewDelivery(orderId: string, riderId: string) {
       address: order.deliveryAddress,
     },
   })
+}
+
+/**
+ * Send new delivery notification to all available riders
+ */
+export async function notifyAllAvailableRiders(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      store: { select: { name: true, address: true } },
+    },
+  })
+
+  if (!order) {
+    throw new Error('Order not found')
+  }
+
+  // Get all available riders
+  const availableRiders = await prisma.rider.findMany({
+    where: {
+      status: 'AVAILABLE',
+      isActive: true,
+    },
+    select: { id: true },
+  })
+
+  // Notify all available riders
+  const notifications = await Promise.all(
+    availableRiders.map((rider) =>
+      sendNotification({
+        type: 'NEW_DELIVERY',
+        riderId: rider.id,
+        orderId,
+        data: {
+          orderNo: order.orderNo,
+          storeName: order.store.name,
+          storeAddress: order.store.address,
+          address: order.deliveryAddress,
+          total: order.total,
+        },
+      })
+    )
+  )
+
+  return {
+    sentCount: notifications.length,
+    notifications,
+  }
 }
 
 /**

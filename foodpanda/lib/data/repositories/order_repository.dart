@@ -13,6 +13,7 @@ class OrderRepository {
     required double deliveryLongitude,
     String? note,
     String? paymentMethod,
+    String? addressId,
   }) async {
     final itemsData = items.map((e) => e.toJson()).toList();
 
@@ -24,6 +25,7 @@ class OrderRepository {
       deliveryLongitude: deliveryLongitude,
       note: note,
       paymentMethod: paymentMethod,
+      addressId: addressId,
     );
 
     return OrderModel.fromJson(data);
