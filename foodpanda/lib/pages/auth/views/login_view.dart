@@ -54,7 +54,7 @@ class LoginView extends GetView<AuthController> {
                   () => CustomTextField(
                     controller: controller.passwordController,
                     label: AppStrings.password,
-                    hint: '••••••••',
+                    hint: 'ລະຫັດຜ່ານ',
                     obscureText: controller.obscurePassword.value,
                     prefixIcon: Icons.lock_outline,
                     suffixIcon: controller.obscurePassword.value
