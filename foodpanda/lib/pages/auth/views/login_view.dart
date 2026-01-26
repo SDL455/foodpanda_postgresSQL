@@ -3,10 +3,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
-import '../../../routes/app_routes.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/custom_text_field.dart';
 import '../controllers/auth_controller.dart';
+import '../widgets/auth_logo.dart';
+import '../widgets/forgot_password_button.dart';
+import '../widgets/google_icon.dart';
+import '../widgets/or_divider.dart';
+import '../widgets/register_link.dart';
+import '../widgets/user_type_toggle.dart';
+import '../widgets/welcome_text.dart';
 
 class LoginView extends GetView<AuthController> {
   const LoginView({super.key});
@@ -25,32 +31,13 @@ class LoginView extends GetView<AuthController> {
               children: [
                 SizedBox(height: 40.h),
                 // User Type Toggle
-                _buildUserTypeToggle(),
+                const UserTypeToggle(),
                 SizedBox(height: 30.h),
                 // Logo
-                _buildLogo(),
+                const AuthLogo(),
                 SizedBox(height: 30.h),
                 // Welcome text
-                Obx(() => Text(
-                      controller.isRiderLogin.value
-                          ? 'ຍິນດີຕ້ອນຮັບ Rider!'
-                          : 'ຍິນດີຕ້ອນຮັບກັບຄືນ!',
-                  style: TextStyle(
-                    fontSize: 28.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                    )),
-                SizedBox(height: 8.h),
-                Obx(() => Text(
-                      controller.isRiderLogin.value
-                          ? 'ເຂົ້າສູ່ລະບົບເພື່ອຮັບງານສົ່ງ'
-                          : 'ເຂົ້າສູ່ລະບົບເພື່ອສັ່ງອາຫານ',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: AppColors.textSecondary,
-                  ),
-                    )),
+                const WelcomeText(),
                 SizedBox(height: 32.h),
                 // Email field
                 CustomTextField(
@@ -67,7 +54,7 @@ class LoginView extends GetView<AuthController> {
                   () => CustomTextField(
                     controller: controller.passwordController,
                     label: AppStrings.password,
-                    hint: '••••••••',
+                    hint: 'ລະຫັດຜ່ານ',
                     obscureText: controller.obscurePassword.value,
                     prefixIcon: Icons.lock_outline,
                     suffixIcon: controller.obscurePassword.value
@@ -79,19 +66,7 @@ class LoginView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 8.h),
                 // Forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: controller.forgotPassword,
-                    child: Text(
-                      AppStrings.forgotPassword,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
+                const ForgotPasswordButton(),
                 SizedBox(height: 24.h),
                 // Login button
                 Obx(
@@ -103,178 +78,32 @@ class LoginView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 24.h),
                 // Divider and Google sign in (only for customer)
-                Obx(() => controller.isRiderLogin.value
-                    ? const SizedBox.shrink()
-                    : Column(
-                        children: [
-                _buildDivider(),
-                SizedBox(height: 24.h),
-                          CustomButton(
-                    text: AppStrings.continueWithGoogle,
-                    onPressed: () {},
-                    isLoading: controller.isLoading.value,
-                    isOutlined: true,
-                    icon: _buildGoogleIcon(),
-                  ),
-                        ],
-                      )),
+                Obx(
+                  () => controller.isRiderLogin.value
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            const OrDivider(),
+                            SizedBox(height: 24.h),
+                            CustomButton(
+                              text: AppStrings.continueWithGoogle,
+                              onPressed: () {},
+                              isLoading: controller.isLoading.value,
+                              isOutlined: true,
+                              icon: const GoogleIcon(),
+                            ),
+                          ],
+                        ),
+                ),
                 SizedBox(height: 32.h),
                 // Register link (only for customer)
-                Obx(() => controller.isRiderLogin.value
-                    ? const SizedBox.shrink()
-                    : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppStrings.dontHaveAccount,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => Get.toNamed(AppRoutes.register),
-                      child: Text(
-                        AppStrings.register,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                      )),
+                const RegisterLink(),
                 SizedBox(height: 24.h),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildUserTypeToggle() {
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppColors.grey100,
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Obx(() => Row(
-            children: [
-              Expanded(
-                child: _buildToggleOption(
-                  icon: Icons.person_outline,
-                  label: 'ລູກຄ້າ',
-                  isSelected: !controller.isRiderLogin.value,
-                  onTap: () {
-                    if (controller.isRiderLogin.value) {
-                      controller.toggleUserType();
-                    }
-                  },
-                ),
-              ),
-              Expanded(
-                child: _buildToggleOption(
-                  icon: Icons.delivery_dining,
-                  label: 'Rider',
-                  isSelected: controller.isRiderLogin.value,
-                  onTap: () {
-                    if (!controller.isRiderLogin.value) {
-                      controller.toggleUserType();
-                    }
-                  },
-                ),
-              ),
-            ],
-          )),
-    );
-  }
-
-  Widget _buildToggleOption({
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(vertical: 14.h),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.white : AppColors.grey600,
-              size: 22.sp,
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? AppColors.white : AppColors.grey600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Center(
-      child: Container(
-        width: 80.w,
-        height: 80.w,
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        child: Icon(Icons.restaurant_menu, size: 40.sp, color: AppColors.white),
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: AppColors.grey300)),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Text(
-            AppStrings.orContinueWith,
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textHint),
-          ),
-        ),
-        Expanded(child: Divider(color: AppColors.grey300)),
-      ],
-    );
-  }
-
-  Widget _buildGoogleIcon() {
-    return Container(
-      width: 24.w,
-      height: 24.w,
-      margin: EdgeInsets.only(right: 8.w),
-      child: Icon(Icons.g_mobiledata, size: 24.sp, color: AppColors.primary),
     );
   }
 }

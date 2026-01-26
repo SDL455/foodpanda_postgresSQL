@@ -31,6 +31,8 @@ import 'package:foodpanda/pages/favorites/bindings/favorites_binding.dart';
 import 'package:foodpanda/pages/favorites/views/favorites_view.dart';
 import 'package:foodpanda/pages/notifications/bindings/notifications_binding.dart';
 import 'package:foodpanda/pages/notifications/views/notifications_view.dart';
+import 'package:foodpanda/pages/search/bindings/search_binding.dart';
+import 'package:foodpanda/pages/search/views/search_view.dart';
 
 import 'package:get/get.dart';
 import 'app_routes.dart';
@@ -131,6 +133,13 @@ class AppPages {
       name: AppRoutes.notifications,
       page: () => const NotificationsView(),
       binding: NotificationsBinding(),
+    ),
+
+    // Search (Foods)
+    GetPage(
+      name: AppRoutes.search,
+      page: () => const SearchView(),
+      binding: SearchBinding(),
     ),
 
     // Rider Main
