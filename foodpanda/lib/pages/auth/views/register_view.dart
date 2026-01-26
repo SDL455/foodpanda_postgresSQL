@@ -79,39 +79,45 @@ class RegisterView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 16.h),
                 // Password field
-                Obx(() => CustomTextField(
-                      controller: controller.passwordController,
-                      label: AppStrings.password,
-                      hint: '••••••••',
-                      obscureText: controller.obscurePassword.value,
-                      prefixIcon: Icons.lock_outline,
-                      suffixIcon: controller.obscurePassword.value
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      onSuffixTap: controller.togglePasswordVisibility,
-                      validator: controller.validatePassword,
-                    )),
+                Obx(
+                  () => CustomTextField(
+                    controller: controller.passwordController,
+                    label: AppStrings.password,
+                    hint: '••••••••',
+                    obscureText: controller.obscurePassword.value,
+                    prefixIcon: Icons.lock_outline,
+                    suffixIcon: controller.obscurePassword.value
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    onSuffixTap: controller.togglePasswordVisibility,
+                    validator: controller.validatePassword,
+                  ),
+                ),
                 SizedBox(height: 16.h),
                 // Confirm password field
-                Obx(() => CustomTextField(
-                      controller: controller.confirmPasswordController,
-                      label: AppStrings.confirmPassword,
-                      hint: '••••••••',
-                      obscureText: controller.obscureConfirmPassword.value,
-                      prefixIcon: Icons.lock_outline,
-                      suffixIcon: controller.obscureConfirmPassword.value
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      onSuffixTap: controller.toggleConfirmPasswordVisibility,
-                      validator: controller.validatePassword,
-                    )),
+                Obx(
+                  () => CustomTextField(
+                    controller: controller.confirmPasswordController,
+                    label: AppStrings.confirmPassword,
+                    hint: '••••••••',
+                    obscureText: controller.obscureConfirmPassword.value,
+                    prefixIcon: Icons.lock_outline,
+                    suffixIcon: controller.obscureConfirmPassword.value
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    onSuffixTap: controller.toggleConfirmPasswordVisibility,
+                    validator: controller.validatePassword,
+                  ),
+                ),
                 SizedBox(height: 32.h),
                 // Register button
-                Obx(() => CustomButton(
-                      text: AppStrings.register,
-                      onPressed: controller.register,
-                      isLoading: controller.isLoading.value,
-                    )),
+                Obx(
+                  () => CustomButton(
+                    text: AppStrings.register,
+                    onPressed: controller.register,
+                    isLoading: controller.isLoading.value,
+                  ),
+                ),
                 SizedBox(height: 24.h),
                 // Login link
                 Row(
