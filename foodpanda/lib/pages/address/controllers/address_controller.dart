@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/repositories/profile_repository.dart';
 import '../../../core/utils/helpers.dart';
@@ -11,6 +13,7 @@ class AddressController extends GetxController {
   // Observable states
   final RxBool isLoading = false.obs;
   final RxBool isSaving = false.obs;
+  final RxBool isGettingLocation = false.obs;
   final RxList<AddressModel> addresses = <AddressModel>[].obs;
 
   // Form controllers
@@ -26,9 +29,10 @@ class AddressController extends GetxController {
   final List<String> predefinedLabels = ['ເຮືອນ', 'ບ່ອນເຮັດວຽກ', 'ອື່ນໆ'];
   final RxString selectedLabel = 'ເຮືອນ'.obs;
 
-  // Coordinates (mock - in real app would use GPS)
-  double latitude = 17.9757;
-  double longitude = 102.6331;
+  // Coordinates
+  final RxDouble latitude = 17.9757.obs;
+  final RxDouble longitude = 102.6331.obs;
+  final RxBool hasValidLocation = false.obs;
 
   @override
   void onInit() {
@@ -72,6 +76,10 @@ class AddressController extends GetxController {
     detailController.clear();
     selectedLabel.value = 'ເຮືອນ';
     isDefault.value = addresses.isEmpty;
+    // Reset location
+    latitude.value = 17.9757;
+    longitude.value = 102.6331;
+    hasValidLocation.value = false;
   }
 
   void prepareForEdit(AddressModel address) {
@@ -83,8 +91,118 @@ class AddressController extends GetxController {
         ? address.label
         : 'ອື່ນໆ';
     isDefault.value = address.isDefault;
-    latitude = address.latitude;
-    longitude = address.longitude;
+    latitude.value = address.latitude;
+    longitude.value = address.longitude;
+    hasValidLocation.value = true;
+  }
+
+  /// ກວດສອບ ແລະ ຂໍ permission ສຳລັບ location
+  Future<bool> _checkLocationPermission() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      Helpers.showSnackbar(
+        title: 'ຂໍ້ຜິດພາດ',
+        message: 'ກະລຸນາເປີດ GPS ໃນອຸປະກອນຂອງທ່ານ',
+        isError: true,
+      );
+      return false;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        Helpers.showSnackbar(
+          title: 'ຂໍ້ຜິດພາດ',
+          message: 'ກະລຸນາອະນຸຍາດໃຫ້ເຂົ້າເຖິງ location',
+          isError: true,
+        );
+        return false;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      Helpers.showSnackbar(
+        title: 'ຂໍ້ຜິດພາດ',
+        message: 'Location ຖືກປະຕິເສດຖາວອນ. ກະລຸນາເປີດໃນ Settings',
+        isError: true,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  /// ດຶງ location ປັດຈຸບັນຈາກ GPS
+  Future<void> getCurrentLocation() async {
+    try {
+      // ກວດສອບ permission
+      final hasPermission = await _checkLocationPermission();
+      if (!hasPermission) return;
+
+      isGettingLocation.value = true;
+
+      // ດຶງ location ປັດຈຸບັນ
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      latitude.value = position.latitude;
+      longitude.value = position.longitude;
+      hasValidLocation.value = true;
+
+      // ແປງ coordinates ເປັນທີ່ຢູ່
+      await _reverseGeocode(position.latitude, position.longitude);
+
+      Helpers.showSnackbar(
+        title: 'ສຳເລັດ',
+        message: 'ດຶງຕຳແໜ່ງປັດຈຸບັນແລ້ວ',
+      );
+    } catch (e) {
+      LoggerService.error('Failed to get current location', e);
+      Helpers.showSnackbar(
+        title: 'ຂໍ້ຜິດພາດ',
+        message: 'ບໍ່ສາມາດດຶງຕຳແໜ່ງໄດ້. ກະລຸນາລອງໃໝ່',
+        isError: true,
+      );
+    } finally {
+      isGettingLocation.value = false;
+    }
+  }
+
+  /// ແປງ coordinates ເປັນທີ່ຢູ່ (Reverse Geocoding)
+  Future<void> _reverseGeocode(double lat, double lng) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(lat, lng);
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        // ສ້າງທີ່ຢູ່ຈາກຂໍ້ມູນ
+        final parts = <String>[];
+        if (place.street != null && place.street!.isNotEmpty) {
+          parts.add(place.street!);
+        }
+        if (place.subLocality != null && place.subLocality!.isNotEmpty) {
+          parts.add(place.subLocality!);
+        }
+        if (place.locality != null && place.locality!.isNotEmpty) {
+          parts.add(place.locality!);
+        }
+        if (place.administrativeArea != null &&
+            place.administrativeArea!.isNotEmpty) {
+          parts.add(place.administrativeArea!);
+        }
+
+        if (parts.isNotEmpty) {
+          addressController.text = parts.join(', ');
+        }
+      }
+    } catch (e) {
+      LoggerService.error('Failed to reverse geocode', e);
+      // ບໍ່ສະແດງ error ເພາະ address ສາມາດໃສ່ເອງໄດ້
+    }
   }
 
   Future<void> saveAddress() async {
@@ -111,6 +229,16 @@ class AddressController extends GetxController {
       return;
     }
 
+    // ກວດສອບວ່າມີ location ຫຼືບໍ່
+    if (!hasValidLocation.value) {
+      Helpers.showSnackbar(
+        title: 'ຂໍ້ຜິດພາດ',
+        message: 'ກະລຸນາດຶງຕຳແໜ່ງປັດຈຸບັນກ່ອນ',
+        isError: true,
+      );
+      return;
+    }
+
     try {
       isSaving.value = true;
 
@@ -123,8 +251,8 @@ class AddressController extends GetxController {
           detail: detailController.text.trim().isNotEmpty
               ? detailController.text.trim()
               : null,
-          latitude: latitude,
-          longitude: longitude,
+          latitude: latitude.value,
+          longitude: longitude.value,
           isDefault: isDefault.value,
         );
         Helpers.showSnackbar(title: 'ສຳເລັດ', message: 'ອັບເດດທີ່ຢູ່ແລ້ວ');
@@ -136,8 +264,8 @@ class AddressController extends GetxController {
           detail: detailController.text.trim().isNotEmpty
               ? detailController.text.trim()
               : null,
-          latitude: latitude,
-          longitude: longitude,
+          latitude: latitude.value,
+          longitude: longitude.value,
           isDefault: isDefault.value,
         );
         Helpers.showSnackbar(title: 'ສຳເລັດ', message: 'ເພີ່ມທີ່ຢູ່ແລ້ວ');

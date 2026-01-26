@@ -157,6 +157,7 @@ class CheckoutController extends GetxController {
             ? noteController.text.trim()
             : null,
         paymentMethod: selectedPaymentMethod.value,
+        addressId: selectedAddress.value!.id,
       );
 
       // Clear cart after successful order

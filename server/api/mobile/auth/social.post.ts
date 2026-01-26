@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   const result = socialAuthSchema.safeParse(body)
   
   if (!result.success) {
-    return errorResponse(result.error.errors[0].message)
+    return errorResponse(result.error.issues[0]?.message ?? 'ຂໍ້ມູນບໍ່ຖືກຕ້ອງ')
   }
   
   const { firebaseUid, provider, email, phone, fullName, avatar, googleId, facebookId, appleId } = result.data

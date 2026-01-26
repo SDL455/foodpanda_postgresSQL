@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
   const result = createOrderSchema.safeParse(body)
   
   if (!result.success) {
-    return errorResponse(result.error.errors[0].message)
+    return errorResponse(result.error.issues[0]?.message ?? 'ຂໍ້ມູນບໍ່ຖືກຕ້ອງ')
   }
   
   const { storeId, addressId, deliveryAddress, deliveryLat, deliveryLng, deliveryNote, paymentMethod, items } = result.data

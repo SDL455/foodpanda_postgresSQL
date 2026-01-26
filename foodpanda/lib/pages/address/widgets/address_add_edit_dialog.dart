@@ -31,6 +31,8 @@ class AddressAddEditDialog extends GetView<AddressController> {
           children: [
             _buildHeader(),
             SizedBox(height: 16.h),
+            _buildLocationButton(),
+            SizedBox(height: 16.h),
             _buildLabelSelection(),
             _buildCustomLabelInput(),
             SizedBox(height: 16.h),
@@ -45,6 +47,117 @@ class AddressAddEditDialog extends GetView<AddressController> {
           ],
         ),
       ),
+    );
+  }
+
+  /// ປຸ່ມດຶງ location ປັດຈຸບັນ
+  Widget _buildLocationButton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'ຕຳແໜ່ງ GPS',
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+        ),
+        SizedBox(height: 8.h),
+        Obx(() {
+          final hasLocation = controller.hasValidLocation.value;
+          final isGetting = controller.isGettingLocation.value;
+
+          return Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: hasLocation
+                  ? AppColors.success.withOpacity(0.1)
+                  : AppColors.grey100,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: hasLocation ? AppColors.success : AppColors.grey300,
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      hasLocation
+                          ? Icons.check_circle
+                          : Icons.location_searching,
+                      color: hasLocation ? AppColors.success : AppColors.grey500,
+                      size: 24.sp,
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            hasLocation
+                                ? 'ຕຳແໜ່ງຖືກຕ້ອງແລ້ວ'
+                                : 'ຍັງບໍ່ໄດ້ດຶງຕຳແໜ່ງ',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: hasLocation
+                                  ? AppColors.success
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                          if (hasLocation) ...[
+                            SizedBox(height: 2.h),
+                            Text(
+                              'Lat: ${controller.latitude.value.toStringAsFixed(6)}, '
+                              'Lng: ${controller.longitude.value.toStringAsFixed(6)}',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: isGetting ? null : controller.getCurrentLocation,
+                    icon: isGetting
+                        ? SizedBox(
+                            width: 16.w,
+                            height: 16.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Icon(Icons.my_location, size: 18.sp),
+                    label: Text(
+                      isGetting
+                          ? 'ກຳລັງດຶງຕຳແໜ່ງ...'
+                          : hasLocation
+                              ? 'ດຶງຕຳແໜ່ງໃໝ່'
+                              : 'ດຶງຕຳແໜ່ງປັດຈຸບັນ',
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 

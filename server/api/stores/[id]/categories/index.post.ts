@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   const result = createCategorySchema.safeParse(body)
   
   if (!result.success) {
-    return errorResponse(result.error.errors[0].message)
+    return errorResponse(result.error.issues[0]?.message ?? 'ຂໍ້ມູນບໍ່ຖືກຕ້ອງ')
   }
   
   // Check if category name already exists in this store

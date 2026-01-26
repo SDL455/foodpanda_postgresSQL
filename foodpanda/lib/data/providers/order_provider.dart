@@ -14,18 +14,62 @@ class OrderProvider {
     required double deliveryLongitude,
     String? note,
     String? paymentMethod,
+    String? addressId,
   }) async {
     try {
+      // Convert payment method to server format
+      String serverPaymentMethod = 'CASH';
+      switch (paymentMethod) {
+        case 'cash':
+          serverPaymentMethod = 'CASH';
+          break;
+        case 'bcel':
+        case 'ldb':
+          serverPaymentMethod = 'BANK_TRANSFER';
+          break;
+        default:
+          serverPaymentMethod = 'CASH';
+      }
+
+      // Convert items to server format
+      final serverItems = items.map((item) {
+        final menuItem = item['menu_item'] as Map<String, dynamic>?;
+        final selectedOptions = item['selected_options'] as List<dynamic>?;
+        
+        // Extract variant IDs from selected options
+        List<String> variantIds = [];
+        if (selectedOptions != null) {
+          for (var option in selectedOptions) {
+            final selectedItems = option['selected_items'] as List<dynamic>?;
+            if (selectedItems != null) {
+              for (var selectedItem in selectedItems) {
+                if (selectedItem['id'] != null) {
+                  variantIds.add(selectedItem['id'].toString());
+                }
+              }
+            }
+          }
+        }
+        
+        return {
+          'productId': menuItem?['id'] ?? item['id'],
+          'quantity': item['quantity'] ?? 1,
+          'note': item['note'],
+          'variantIds': variantIds,
+        };
+      }).toList();
+
       final response = await _apiClient.post(
         ApiConstants.createOrder,
         data: {
-          'restaurant_id': restaurantId,
-          'items': items,
-          'delivery_address': deliveryAddress,
-          'delivery_latitude': deliveryLatitude,
-          'delivery_longitude': deliveryLongitude,
-          'note': note,
-          'payment_method': paymentMethod,
+          'storeId': restaurantId,
+          'addressId': addressId,
+          'items': serverItems,
+          'deliveryAddress': deliveryAddress,
+          'deliveryLat': deliveryLatitude,
+          'deliveryLng': deliveryLongitude,
+          'deliveryNote': note,
+          'paymentMethod': serverPaymentMethod,
         },
       );
       return response.data;
