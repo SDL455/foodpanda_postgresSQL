@@ -59,20 +59,37 @@ class OrderProvider {
         };
       }).toList();
 
+      // Build request data, only include addressId if it's not null
+      final Map<String, dynamic> requestData = {
+        'storeId': restaurantId,
+        'items': serverItems,
+        'deliveryAddress': deliveryAddress,
+        'deliveryLat': deliveryLatitude,
+        'deliveryLng': deliveryLongitude,
+        'paymentMethod': serverPaymentMethod,
+      };
+      
+      // Only add optional fields if they have values
+      if (addressId != null && addressId.isNotEmpty) {
+        requestData['addressId'] = addressId;
+      }
+      if (note != null && note.isNotEmpty) {
+        requestData['deliveryNote'] = note;
+      }
+
       final response = await _apiClient.post(
         ApiConstants.createOrder,
-        data: {
-          'storeId': restaurantId,
-          'addressId': addressId,
-          'items': serverItems,
-          'deliveryAddress': deliveryAddress,
-          'deliveryLat': deliveryLatitude,
-          'deliveryLng': deliveryLongitude,
-          'deliveryNote': note,
-          'paymentMethod': serverPaymentMethod,
-        },
+        data: requestData,
       );
-      return response.data;
+      
+      // Response format: { success: true, data: {...}, message: '...' }
+      // Extract the data field from the response
+      final responseData = response.data;
+      if (responseData is Map && responseData['data'] != null) {
+        return responseData['data'] as Map<String, dynamic>;
+      }
+      // Fallback to the whole response if structure is different
+      return responseData as Map<String, dynamic>;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
