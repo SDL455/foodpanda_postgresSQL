@@ -89,7 +89,7 @@ class OnlineToggleCard extends StatelessWidget {
       child: Switch(
         value: controller.isOnline.value,
         onChanged: (_) => controller.toggleOnlineStatus(),
-        activeColor: AppColors.success,
+        activeThumbColor: AppColors.success,
         activeTrackColor: AppColors.success.withOpacity(0.3),
       ),
     );

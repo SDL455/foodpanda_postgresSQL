@@ -31,8 +31,11 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           final token = StorageService.token;
-          if (token != null) {
+          if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
+            LoggerService.info('TOKEN: ${token.substring(0, 20)}...');
+          } else {
+            LoggerService.warning('NO TOKEN AVAILABLE');
           }
           LoggerService.info(
             'REQUEST[${options.method}] => PATH: ${options.path}',
@@ -126,6 +129,33 @@ class ApiClient {
       data: data,
       queryParameters: queryParameters,
       options: options,
+    );
+  }
+
+  // Upload file
+  Future<Response> uploadFile(
+    String path, {
+    required String filePath,
+    required String fileName,
+    String fieldName = 'file',
+    Map<String, dynamic>? extraData,
+    void Function(int, int)? onSendProgress,
+  }) async {
+    final formData = FormData.fromMap({
+      fieldName: await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+      ),
+      if (extraData != null) ...extraData,
+    });
+
+    return await _dio.post(
+      path,
+      data: formData,
+      onSendProgress: onSendProgress,
+      options: Options(
+        contentType: 'multipart/form-data',
+      ),
     );
   }
 }

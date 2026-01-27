@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/profile_repository.dart';
 import '../../../core/utils/storage_service.dart';
@@ -12,6 +14,10 @@ class ProfileController extends GetxController {
   final Rxn<UserModel> user = Rxn<UserModel>();
   final RxBool isLoading = false.obs;
   final RxBool isUpdating = false.obs;
+  final RxBool isUploadingAvatar = false.obs;
+  final RxDouble uploadProgress = 0.0.obs;
+
+  final ImagePicker _imagePicker = ImagePicker();
 
   // Form controllers for edit profile
   final fullNameController = TextEditingController();
@@ -136,6 +142,124 @@ class ProfileController extends GetxController {
       default:
         return user.value?.authProvider ?? '-';
     }
+  }
+
+  // Pick and upload avatar
+  Future<void> pickAndUploadAvatar({ImageSource source = ImageSource.gallery}) async {
+    // Check if user is logged in
+    final token = StorageService.token;
+    if (token == null || token.isEmpty) {
+      LoggerService.warning('No token found, redirecting to login');
+      Helpers.showSnackbar(
+        title: 'ກະລຸນາເຂົ້າສູ່ລະບົບໃໝ່',
+        message: 'Session ໝົດອາຍຸ ກະລຸນາເຂົ້າສູ່ລະບົບໃໝ່',
+        isError: true,
+      );
+      await StorageService.clearAuthData();
+      Get.offAllNamed(AppRoutes.login);
+      return;
+    }
+
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+
+      if (pickedFile == null) return;
+
+      isUploadingAvatar.value = true;
+      uploadProgress.value = 0.0;
+
+      LoggerService.info('Uploading avatar...');
+      final File imageFile = File(pickedFile.path);
+      final String avatarUrl = await _repository.uploadAvatar(imageFile);
+      LoggerService.info('Avatar uploaded: $avatarUrl');
+
+      // Update profile with new avatar URL
+      LoggerService.info('Updating profile with new avatar...');
+      final updatedUser = await _repository.updateProfile(
+        avatar: avatarUrl,
+      );
+
+      user.value = updatedUser;
+      await StorageService.setUserData(user.value!.toJson());
+      _initFormControllers();
+
+      Helpers.showSnackbar(
+        title: 'ສຳເລັດ',
+        message: 'ອັບເດດຮູບໂປຣໄຟລ໌ສຳເລັດ',
+      );
+    } catch (e) {
+      LoggerService.error('Failed to upload avatar', e);
+      
+      // Check if it's an authentication error (401)
+      final errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('401') || errorMessage.contains('unauthorized')) {
+        Helpers.showSnackbar(
+          title: 'Session ໝົດອາຍຸ',
+          message: 'ກະລຸນາເຂົ້າສູ່ລະບົບໃໝ່',
+          isError: true,
+        );
+        await StorageService.clearAuthData();
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
+      
+      Helpers.showSnackbar(
+        title: 'ຂໍ້ຜິດພາດ',
+        message: 'ບໍ່ສາມາດອັບໂຫຼດຮູບໄດ້',
+        isError: true,
+      );
+    } finally {
+      isUploadingAvatar.value = false;
+      uploadProgress.value = 0.0;
+    }
+  }
+
+  // Show image source picker dialog
+  void showImageSourceDialog() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'ເລືອກຮູບພາບ',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.blue),
+              title: const Text('ເລືອກຈາກຄັງຮູບ'),
+              onTap: () {
+                Get.back();
+                pickAndUploadAvatar(source: ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.green),
+              title: const Text('ຖ່າຍຮູບໃໝ່'),
+              onTap: () {
+                Get.back();
+                pickAndUploadAvatar(source: ImageSource.camera);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
   }
 
   // Navigation methods

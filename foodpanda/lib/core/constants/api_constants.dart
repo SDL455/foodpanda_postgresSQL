@@ -8,10 +8,10 @@ class ApiConstants {
   // ສຳລັບ iOS Simulator: ໃຊ້ localhost
   // ສຳລັບ Device ຈິງ: ໃຊ້ IP address ຂອງ computer (ຕົວຢ່າງ: 192.168.1.100)
   // ປ່ຽນ IP ນີ້ເປັນ IP ຂອງຄອມພິວເຕີທ່ານ ຖ້າໃຊ້ device ຈິງ
-  static const String _deviceIp = '192.168.100.38';
+  static const String _deviceIp = '172.20.10.6';
 
   // ຕັ້ງເປັນ true ຖ້າໃຊ້ device ຈິງ, false ຖ້າໃຊ້ emulator
-  static const bool _useRealDevice = false;
+  static const bool _useRealDevice = true;
 
   /// Server base URL (ບໍ່ມີ /api) - ໃຊ້ສຳລັບໂຫຼດຮູບພາບ
   static String get serverUrl {
@@ -125,6 +125,9 @@ class ApiConstants {
 
   // Favorites Endpoints
   static const String favorites = '/mobile/customer/favorites';
+
+  // Upload Endpoints
+  static const String upload = '/upload';
 
   // Timeouts
   static const int connectionTimeout = 30000; // 30 seconds

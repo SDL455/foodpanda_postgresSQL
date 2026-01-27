@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../../core/network/api_client.dart';
 import '../../core/constants/api_constants.dart';
 import '../models/user_model.dart';
@@ -5,6 +6,24 @@ import '../models/address_model.dart';
 
 class ProfileRepository {
   final ApiClient _apiClient = ApiClient();
+
+  // Upload avatar image
+  Future<String> uploadAvatar(File imageFile) async {
+    final fileName = imageFile.path.split('/').last;
+    final response = await _apiClient.uploadFile(
+      ApiConstants.upload,
+      filePath: imageFile.path,
+      fileName: fileName,
+    );
+
+    if (response.data['success'] == true && response.data['files'] != null) {
+      final files = response.data['files'] as List;
+      if (files.isNotEmpty) {
+        return files.first['url'] as String;
+      }
+    }
+    throw Exception('Failed to upload image');
+  }
 
   // Get current user profile
   Future<UserModel> getProfile() async {

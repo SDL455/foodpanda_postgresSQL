@@ -44,31 +44,71 @@ class ProfileUserCard extends GetView<ProfileController> {
   }
 
   Widget _buildAvatar(user) {
-    return Container(
-      width: 70.w,
-      height: 70.w,
-      decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        shape: BoxShape.circle,
-      ),
-      child: user?.avatar != null && user!.avatar!.isNotEmpty
-          ? ClipOval(
-              child: CachedImage(
-                imageUrl: ApiConstants.getImageUrl(user.avatar),
-                width: 70.w,
-                height: 70.w,
+    return GestureDetector(
+      onTap: () => controller.showImageSourceDialog(),
+      child: Stack(
+        children: [
+          Container(
+            width: 70.w,
+            height: 70.w,
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              shape: BoxShape.circle,
+            ),
+            child: Obx(() {
+              if (controller.isUploadingAvatar.value) {
+                return Center(
+                  child: SizedBox(
+                    width: 30.w,
+                    height: 30.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                    ),
+                  ),
+                );
+              }
+              return user?.avatar != null && user!.avatar!.isNotEmpty
+                  ? ClipOval(
+                      child: CachedImage(
+                        imageUrl: ApiConstants.getImageUrl(user.avatar),
+                        width: 70.w,
+                        height: 70.w,
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        user?.initials ?? 'U',
+                        style: TextStyle(
+                          fontSize: 28.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    );
+            }),
+          ),
+          // Camera icon overlay
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              width: 24.w,
+              height: 24.w,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.white, width: 2),
               ),
-            )
-          : Center(
-              child: Text(
-                user?.initials ?? 'U',
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
+              child: Icon(
+                Icons.camera_alt,
+                color: AppColors.white,
+                size: 14.sp,
               ),
             ),
+          ),
+        ],
+      ),
     );
   }
 
