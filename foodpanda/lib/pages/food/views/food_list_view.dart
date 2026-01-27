@@ -19,7 +19,7 @@ class FoodListView extends GetView<FoodListController> {
         backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -32,67 +32,130 @@ class FoodListView extends GetView<FoodListController> {
         ),
         centerTitle: true,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value && controller.foods.isEmpty) {
-          return _buildShimmerLoading();
-        }
+      body: Column(
+        children: [
+          // Search bar
+          _buildSearchBar(),
+          // Food list
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.foods.isEmpty) {
+                return _buildShimmerLoading();
+              }
 
-        if (controller.foods.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.fastfood_outlined,
-                  size: 64.sp,
-                  color: AppColors.grey400,
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'ບໍ່ມີອາຫານ',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: AppColors.textSecondary,
+              if (controller.foods.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.fastfood_outlined,
+                        size: 64.sp,
+                        color: AppColors.grey400,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'ບໍ່ມີອາຫານ',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      if (controller.searchQuery.value.isNotEmpty) ...[
+                        SizedBox(height: 8.h),
+                        TextButton(
+                          onPressed: controller.clearSearch,
+                          child: Text(
+                            'ລ້າງການຄົ້ນຫາ',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: controller.refreshFoods,
+                color: AppColors.primary,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification is ScrollEndNotification &&
+                        notification.metrics.extentAfter < 200) {
+                      controller.loadMore();
+                    }
+                    return false;
+                  },
+                  child: GridView.builder(
+                    padding: EdgeInsets.all(16.w),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12.h,
+                      crossAxisSpacing: 12.w,
+                      childAspectRatio: 0.75,
+                    ),
+                    itemCount:
+                        controller.foods.length +
+                        (controller.isLoadingMore.value ? 2 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= controller.foods.length) {
+                        return _buildLoadingItem();
+                      }
+                      final food = controller.foods[index];
+                      return _buildFoodCard(food);
+                    },
                   ),
                 ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.refreshFoods,
-          color: AppColors.primary,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification is ScrollEndNotification &&
-                  notification.metrics.extentAfter < 200) {
-                controller.loadMore();
-              }
-              return false;
-            },
-            child: GridView.builder(
-              padding: EdgeInsets.all(16.w),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12.h,
-                crossAxisSpacing: 12.w,
-                childAspectRatio: 0.75,
-              ),
-              itemCount:
-                  controller.foods.length +
-                  (controller.isLoadingMore.value ? 2 : 0),
-              itemBuilder: (context, index) {
-                if (index >= controller.foods.length) {
-                  return _buildLoadingItem();
-                }
-                final food = controller.foods[index];
-                return _buildFoodCard(food);
-              },
-            ),
+              );
+            }),
           ),
-        );
-      }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      color: AppColors.white,
+      child: TextField(
+        controller: controller.searchController,
+        onChanged: (value) {
+          // Debounce search
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (value == controller.searchQuery.value) return;
+            controller.search(value);
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'ຄົ້ນຫາອາຫານ...',
+          hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+          prefixIcon: Icon(Icons.search, color: AppColors.grey500, size: 20.sp),
+          suffixIcon: Obx(() {
+            if (controller.searchQuery.value.isNotEmpty) {
+              return IconButton(
+                icon: Icon(Icons.clear, color: AppColors.grey500, size: 20.sp),
+                onPressed: controller.clearSearch,
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+          filled: true,
+          fillColor: AppColors.grey100,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 12.h,
+          ),
+        ),
+      ),
     );
   }
 

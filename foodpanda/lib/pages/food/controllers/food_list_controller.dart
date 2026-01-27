@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/food_model.dart';
 import '../../../data/repositories/restaurant_repository.dart';
@@ -7,6 +8,9 @@ import '../../../core/utils/logger_service.dart';
 class FoodListController extends GetxController {
   final RestaurantRepository _repository = RestaurantRepository();
 
+  // Search controller
+  final TextEditingController searchController = TextEditingController();
+
   // Observable states
   final RxList<FoodModel> foods = <FoodModel>[].obs;
   final RxBool isLoading = false.obs;
@@ -15,10 +19,19 @@ class FoodListController extends GetxController {
   final RxInt currentPage = 1.obs;
   final int limit = 20;
 
+  // Search
+  final RxString searchQuery = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
     loadFoods();
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 
   Future<void> loadFoods({bool refresh = false}) async {
@@ -39,6 +52,7 @@ class FoodListController extends GetxController {
       final result = await _repository.getFoods(
         page: currentPage.value,
         limit: limit,
+        search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
       );
 
       if (refresh || currentPage.value == 1) {
@@ -76,5 +90,16 @@ class FoodListController extends GetxController {
     if (!isLoadingMore.value && hasMore.value) {
       loadFoods();
     }
+  }
+
+  void search(String query) {
+    searchQuery.value = query;
+    loadFoods(refresh: true);
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+    loadFoods(refresh: true);
   }
 }
