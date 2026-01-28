@@ -8,7 +8,9 @@ import '../../profile/controllers/profile_controller.dart';
 class MainBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put<MainController>(MainController());
+    if (!Get.isRegistered<MainController>()) {
+      Get.put<MainController>(MainController(), permanent: true);
+    }
     Get.lazyPut<HomeController>(() => HomeController());
     if (!Get.isRegistered<CartController>()) {
       Get.put<CartController>(CartController(), permanent: true);
