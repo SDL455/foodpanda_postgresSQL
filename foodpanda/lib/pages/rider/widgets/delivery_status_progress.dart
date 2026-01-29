@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/constants/app_colors.dart';
-import '../controllers/rider_delivery_controller.dart';
+import '../../../data/models/delivery_model.dart';
 
 /// Widget ສະແດງຂັ້ນຕອນການສົ່ງອາຫານ
 class DeliveryStatusProgress extends StatelessWidget {
-  final DeliveryItem delivery;
+  final DeliveryModel delivery;
 
   const DeliveryStatusProgress({super.key, required this.delivery});
 
@@ -21,37 +21,16 @@ class DeliveryStatusProgress extends StatelessWidget {
             children: [
               StatusStep(
                 label: 'ຮັບງານ',
-                isActive:
-                    delivery.status.index >= DeliveryStatus.accepted.index,
-                isCompleted:
-                    delivery.status.index > DeliveryStatus.accepted.index,
+                isActive: _isStatusActive(DeliveryStatus.pickedUp),
+                isCompleted: _isStatusCompleted(DeliveryStatus.pickedUp),
               ),
-              StatusLine(
-                isCompleted:
-                    delivery.status.index > DeliveryStatus.accepted.index,
-              ),
-              StatusStep(
-                label: 'ຮັບອາຫານ',
-                isActive:
-                    delivery.status.index >= DeliveryStatus.pickedUp.index,
-                isCompleted:
-                    delivery.status.index > DeliveryStatus.pickedUp.index,
-              ),
-              StatusLine(
-                isCompleted:
-                    delivery.status.index > DeliveryStatus.pickedUp.index,
-              ),
+              StatusLine(isCompleted: _isStatusCompleted(DeliveryStatus.pickedUp)),
               StatusStep(
                 label: 'ກຳລັງສົ່ງ',
-                isActive:
-                    delivery.status.index >= DeliveryStatus.delivering.index,
-                isCompleted:
-                    delivery.status.index > DeliveryStatus.delivering.index,
+                isActive: _isStatusActive(DeliveryStatus.delivering),
+                isCompleted: _isStatusCompleted(DeliveryStatus.delivering),
               ),
-              StatusLine(
-                isCompleted:
-                    delivery.status.index > DeliveryStatus.delivering.index,
-              ),
+              StatusLine(isCompleted: _isStatusCompleted(DeliveryStatus.delivering)),
               StatusStep(
                 label: 'ສຳເລັດ',
                 isActive: delivery.status == DeliveryStatus.delivered,
@@ -62,6 +41,14 @@ class DeliveryStatusProgress extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _isStatusActive(DeliveryStatus status) {
+    return delivery.status.index >= status.index;
+  }
+
+  bool _isStatusCompleted(DeliveryStatus status) {
+    return delivery.status.index > status.index;
   }
 }
 

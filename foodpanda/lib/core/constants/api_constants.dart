@@ -8,7 +8,7 @@ class ApiConstants {
   // ສຳລັບ iOS Simulator: ໃຊ້ localhost
   // ສຳລັບ Device ຈິງ: ໃຊ້ IP address ຂອງ computer (ຕົວຢ່າງ: 192.168.1.100)
   // ປ່ຽນ IP ນີ້ເປັນ IP ຂອງຄອມພິວເຕີທ່ານ ຖ້າໃຊ້ device ຈິງ
-  static const String _deviceIp = '172.20.10.6';
+  static const String _deviceIp = '192.168.100.38';
 
   // ຕັ້ງເປັນ true ຖ້າໃຊ້ device ຈິງ, false ຖ້າໃຊ້ emulator
   static const bool _useRealDevice = true;
@@ -68,6 +68,18 @@ class ApiConstants {
   // Rider Auth Endpoints
   static const String riderLogin = '/auth/rider/login';
   static const String riderProfile = '/rider/profile';
+
+  // Rider Mobile Endpoints
+  static const String riderProfileMobile = '/mobile/rider/profile';
+  static const String riderStatus = '/mobile/rider/status';
+  static const String riderLocation = '/mobile/rider/location';
+  static const String riderDeliveries = '/mobile/rider/deliveries';
+  static const String riderEarnings = '/mobile/rider/earnings';
+  static const String riderNotifications = '/mobile/rider/notifications';
+  static const String riderNotificationUnreadCount =
+      '/mobile/rider/notifications/unread-count';
+  static const String riderNotificationReadAll =
+      '/mobile/rider/notifications/read-all';
 
   // User/Customer Endpoints
   static const String profile = '/mobile/customer/profile';

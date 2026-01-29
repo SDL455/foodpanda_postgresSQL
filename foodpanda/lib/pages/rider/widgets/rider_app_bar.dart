@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/rider_controller.dart';
+import '../controllers/rider_notification_controller.dart';
 
 /// SliverAppBar ສຳລັບໜ້າຫຼັກຂອງ Rider
 class RiderAppBar extends StatelessWidget {
@@ -83,35 +84,61 @@ class RiderAppBar extends StatelessWidget {
   }
 }
 
-/// ປຸ່ມແຈ້ງເຕືອນ
+/// ປຸ່ມແຈ້ງເຕືອນ ພ້ອມ badge ສະແດງຈຳນວນທີ່ຍັງບໍ່ອ່ານ
 class NotificationButton extends StatelessWidget {
   const NotificationButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {},
-      icon: Stack(
-        children: [
-          Icon(
-            Icons.notifications_outlined,
-            color: AppColors.white,
-            size: 28.sp,
-          ),
-          Positioned(
-            right: 0,
-            top: 0,
-            child: Container(
-              width: 10.w,
-              height: 10.w,
-              decoration: const BoxDecoration(
-                color: AppColors.warning,
-                shape: BoxShape.circle,
+    return GetBuilder<RiderNotificationController>(
+      init: Get.isRegistered<RiderNotificationController>()
+          ? Get.find<RiderNotificationController>()
+          : RiderNotificationController(),
+      builder: (controller) {
+        return IconButton(
+          onPressed: () => Get.toNamed('/rider/notifications'),
+          icon: Stack(
+            children: [
+              Icon(
+                Icons.notifications_outlined,
+                color: AppColors.white,
+                size: 28.sp,
               ),
-            ),
+              Obx(() {
+                if (controller.unreadCount.value > 0) {
+                  return Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(4.w),
+                      decoration: const BoxDecoration(
+                        color: AppColors.warning,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 16.w,
+                        minHeight: 16.w,
+                      ),
+                      child: Text(
+                        controller.unreadCount.value > 99
+                            ? '99+'
+                            : controller.unreadCount.value.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

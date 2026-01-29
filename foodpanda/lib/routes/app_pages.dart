@@ -17,6 +17,7 @@ import 'package:foodpanda/pages/profile/bindings/profile_binding.dart';
 import 'package:foodpanda/pages/profile/views/profile_view.dart';
 import 'package:foodpanda/pages/rider/bindings/rider_binding.dart';
 import 'package:foodpanda/pages/rider/views/rider_main_view.dart';
+import 'package:foodpanda/pages/rider/views/rider_notifications_view.dart';
 import 'package:foodpanda/pages/splash/bindings/splash_binding.dart';
 import 'package:foodpanda/pages/splash/views/splash_view.dart';
 
@@ -155,6 +156,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.riderMain,
       page: () => const RiderMainView(),
+      binding: RiderBinding(),
+    ),
+
+    // Rider Notifications
+    GetPage(
+      name: AppRoutes.riderNotifications,
+      page: () => const RiderNotificationsView(),
       binding: RiderBinding(),
     ),
   ];

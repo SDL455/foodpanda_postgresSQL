@@ -21,7 +21,7 @@ class RiderHomeView extends GetView<RiderController> {
       body: RefreshIndicator(
         onRefresh: () async {
           await controller.refreshData();
-          await deliveryController.loadDeliveries();
+          await deliveryController.refreshDeliveries();
         },
         child: CustomScrollView(
           slivers: [

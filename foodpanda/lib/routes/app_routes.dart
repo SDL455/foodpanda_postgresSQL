@@ -40,4 +40,5 @@ abstract class AppRoutes {
   // Rider Routes
   static const riderMain = '/rider/main';
   static const riderDeliveryDetail = '/rider/delivery-detail';
+  static const riderNotifications = '/rider/notifications';
 }
