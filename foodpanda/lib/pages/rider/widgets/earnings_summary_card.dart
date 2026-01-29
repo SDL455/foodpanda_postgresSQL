@@ -55,7 +55,7 @@ class EarningsSummaryCard extends StatelessWidget {
   Widget _buildTotalAmount() {
     return Obx(
       () => Text(
-        '${controller.totalEarnings.value.toStringAsFixed(0)}₭',
+        '${controller.totalEarnings.value}₭',
         style: TextStyle(
           fontSize: 36.sp,
           fontWeight: FontWeight.bold,
@@ -128,7 +128,9 @@ class EarningsSummaryItem extends StatelessWidget {
         Obx(() {
           String displayValue;
           if (isCurrency) {
-            displayValue = '${(value.value as double).toStringAsFixed(0)}₭';
+            final v = value.value;
+            final n = v is int ? v.toDouble() : (v as num).toDouble();
+            displayValue = '${n.toStringAsFixed(0)}₭';
           } else {
             displayValue = '${value.value}$suffix';
           }

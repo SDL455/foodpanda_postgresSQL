@@ -11,7 +11,7 @@ class ApiConstants {
   static const String _deviceIp = '192.168.100.38';
 
   // ຕັ້ງເປັນ true ຖ້າໃຊ້ device ຈິງ, false ຖ້າໃຊ້ emulator
-  static const bool _useRealDevice = false;
+  static const bool _useRealDevice = true;
 
   /// Server base URL (ບໍ່ມີ /api) - ໃຊ້ສຳລັບໂຫຼດຮູບພາບ
   static String get serverUrl {
@@ -69,6 +69,18 @@ class ApiConstants {
   static const String riderLogin = '/auth/rider/login';
   static const String riderProfile = '/rider/profile';
 
+  // Rider Mobile Endpoints
+  static const String riderProfileMobile = '/mobile/rider/profile';
+  static const String riderStatus = '/mobile/rider/status';
+  static const String riderLocation = '/mobile/rider/location';
+  static const String riderDeliveries = '/mobile/rider/deliveries';
+  static const String riderEarnings = '/mobile/rider/earnings';
+  static const String riderNotifications = '/mobile/rider/notifications';
+  static const String riderNotificationUnreadCount =
+      '/mobile/rider/notifications/unread-count';
+  static const String riderNotificationReadAll =
+      '/mobile/rider/notifications/read-all';
+
   // User/Customer Endpoints
   static const String profile = '/mobile/customer/profile';
   static const String updateProfile = '/mobile/customer/profile';
@@ -125,6 +137,9 @@ class ApiConstants {
 
   // Favorites Endpoints
   static const String favorites = '/mobile/customer/favorites';
+
+  // Upload Endpoints
+  static const String upload = '/upload';
 
   // Timeouts
   static const int connectionTimeout = 30000; // 30 seconds

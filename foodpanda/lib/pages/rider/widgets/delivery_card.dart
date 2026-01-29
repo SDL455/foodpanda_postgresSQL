@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../data/models/delivery_model.dart';
 import '../controllers/rider_delivery_controller.dart';
 import '../views/rider_delivery_detail_view.dart';
 
 /// Widget ສະແດງ Card ຂອງງານສົ່ງແຕ່ລະອັນ
 class DeliveryCard extends StatelessWidget {
-  final DeliveryItem delivery;
+  final DeliveryModel delivery;
   final RiderDeliveryController controller;
 
   const DeliveryCard({
@@ -34,7 +35,8 @@ class DeliveryCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => Get.to(() => RiderDeliveryDetailView(delivery: delivery)),
+          onTap: () =>
+              Get.to(() => RiderDeliveryDetailView(delivery: delivery)),
           borderRadius: BorderRadius.circular(16.r),
           child: Padding(
             padding: EdgeInsets.all(16.w),
@@ -47,7 +49,7 @@ class DeliveryCard extends StatelessWidget {
                 _buildDottedLine(),
                 _buildCustomerInfo(),
                 SizedBox(height: 16.h),
-                if (delivery.status == DeliveryStatus.pending) _buildAcceptButton(),
+                if (delivery.canAccept) _buildAcceptButton(),
               ],
             ),
           ),
@@ -96,7 +98,7 @@ class DeliveryCard extends StatelessWidget {
         Icon(Icons.location_on, size: 14.sp, color: AppColors.grey500),
         SizedBox(width: 2.w),
         Text(
-          '${delivery.distance} km',
+          '${delivery.distance?.toStringAsFixed(1)} km',
           style: TextStyle(fontSize: 12.sp, color: AppColors.grey600),
         ),
       ],
@@ -111,7 +113,7 @@ class DeliveryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
-        '${delivery.deliveryFee.toString()}₭',
+        delivery.formattedDeliveryFee,
         style: TextStyle(
           fontSize: 13.sp,
           fontWeight: FontWeight.bold,
@@ -132,7 +134,8 @@ class DeliveryCard extends StatelessWidget {
             children: [
               Text(
                 'ຮ້ານ',
-                style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
+                style:
+                    TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
               ),
               Text(
                 delivery.storeName,
@@ -142,6 +145,14 @@ class DeliveryCard extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
+              if (delivery.storeAddress != null)
+                Text(
+                  delivery.storeAddress!,
+                  style:
+                      TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
             ],
           ),
         ),
@@ -171,7 +182,8 @@ class DeliveryCard extends StatelessWidget {
             children: [
               Text(
                 'ລູກຄ້າ',
-                style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
+                style:
+                    TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
               ),
               Text(
                 delivery.customerName,
@@ -183,7 +195,8 @@ class DeliveryCard extends StatelessWidget {
               ),
               Text(
                 delivery.customerAddress,
-                style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+                style:
+                    TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -206,23 +219,36 @@ class DeliveryCard extends StatelessWidget {
   }
 
   Widget _buildAcceptButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => controller.acceptDelivery(delivery),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
-          padding: EdgeInsets.symmetric(vertical: 12.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+    return Obx(() => SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed:
+                controller.isAccepting.value
+                    ? null
+                    : () => controller.acceptDelivery(delivery),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+            child: controller.isAccepting.value
+                ? SizedBox(
+                    height: 20.h,
+                    width: 20.h,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    'ຮັບງານນີ້',
+                    style:
+                        TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+                  ),
           ),
-        ),
-        child: Text(
-          'ຮັບງານນີ້',
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
+        ));
   }
 }

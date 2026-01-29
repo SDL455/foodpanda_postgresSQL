@@ -1,204 +1,328 @@
 import 'package:get/get.dart';
-
-enum DeliveryStatus { pending, accepted, pickedUp, delivering, delivered }
-
-class DeliveryItem {
-  final String id;
-  final String orderNo;
-  final String customerName;
-  final String customerPhone;
-  final String customerAddress;
-  final double customerLat;
-  final double customerLng;
-  final String storeName;
-  final String storeAddress;
-  final double storeLat;
-  final double storeLng;
-  final int totalAmount;
-  final int deliveryFee;
-  final DeliveryStatus status;
-  final DateTime createdAt;
-  final double? distance;
-  final int? estimatedTime;
-
-  DeliveryItem({
-    required this.id,
-    required this.orderNo,
-    required this.customerName,
-    required this.customerPhone,
-    required this.customerAddress,
-    required this.customerLat,
-    required this.customerLng,
-    required this.storeName,
-    required this.storeAddress,
-    required this.storeLat,
-    required this.storeLng,
-    required this.totalAmount,
-    required this.deliveryFee,
-    required this.status,
-    required this.createdAt,
-    this.distance,
-    this.estimatedTime,
-  });
-}
+import '../../../data/models/delivery_model.dart';
+import '../../../data/repositories/rider_repository.dart';
 
 class RiderDeliveryController extends GetxController {
-  final RxList<DeliveryItem> availableDeliveries = <DeliveryItem>[].obs;
-  final RxList<DeliveryItem> activeDeliveries = <DeliveryItem>[].obs;
-  final RxList<DeliveryItem> completedDeliveries = <DeliveryItem>[].obs;
-  final Rxn<DeliveryItem> currentDelivery = Rxn<DeliveryItem>();
+  final RiderRepository _repository = RiderRepository();
 
+  // Delivery lists
+  final RxList<DeliveryModel> availableDeliveries = <DeliveryModel>[].obs;
+  final RxList<DeliveryModel> activeDeliveries = <DeliveryModel>[].obs;
+  final RxList<DeliveryModel> completedDeliveries = <DeliveryModel>[].obs;
+
+  // Current delivery being viewed/managed
+  final Rxn<DeliveryModel> currentDelivery = Rxn<DeliveryModel>();
+
+  // Loading states
   final RxBool isLoading = false.obs;
+  final RxBool isAccepting = false.obs;
+  final RxBool isUpdatingStatus = false.obs;
+
+  // Tab selection
   final RxInt selectedTab = 0.obs;
+
+  // Error message
+  final RxString errorMessage = ''.obs;
+
+  // Pagination
+  int _availablePage = 1;
+  int _activePage = 1;
+  int _completedPage = 1;
+  bool _hasMoreAvailable = true;
+  bool _hasMoreActive = true;
+  bool _hasMoreCompleted = true;
 
   @override
   void onInit() {
     super.onInit();
-    loadDeliveries();
+    loadAllDeliveries();
   }
 
-  Future<void> loadDeliveries() async {
-    isLoading.value = true;
-    try {
-      // TODO: Load from API
-      await Future.delayed(const Duration(seconds: 1));
+  /// Load all types of deliveries
+  Future<void> loadAllDeliveries() async {
+    await Future.wait([
+      loadAvailableDeliveries(refresh: true),
+      loadActiveDeliveries(refresh: true),
+      loadCompletedDeliveries(refresh: true),
+    ]);
+  }
 
-      // Mock data
-      availableDeliveries.value = [
-        DeliveryItem(
-          id: '1',
-          orderNo: 'FP001234',
-          customerName: 'ທ້າວ ສົມສັກ',
-          customerPhone: '020 9999 8888',
-          customerAddress: 'ບ້ານ ໂພນສະຫວ່າງ, ນະຄອນຫຼວງວຽງຈັນ',
-          customerLat: 17.9757,
-          customerLng: 102.6331,
-          storeName: 'ຮ້ານອາຫານລາວ',
-          storeAddress: 'ບ້ານ ໂພນໄຊ',
-          storeLat: 17.9657,
-          storeLng: 102.6231,
-          totalAmount: 85000,
-          deliveryFee: 15000,
-          status: DeliveryStatus.pending,
-          createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-          distance: 2.5,
-          estimatedTime: 15,
-        ),
-        DeliveryItem(
-          id: '2',
-          orderNo: 'FP001235',
-          customerName: 'ນາງ ມະນີ',
-          customerPhone: '020 8888 7777',
-          customerAddress: 'ບ້ານ ສີສະເກດ, ນະຄອນຫຼວງວຽງຈັນ',
-          customerLat: 17.9857,
-          customerLng: 102.6431,
-          storeName: 'KFC',
-          storeAddress: 'ບ້ານ ທົ່ງຂັນຄຳ',
-          storeLat: 17.9557,
-          storeLng: 102.6131,
-          totalAmount: 120000,
-          deliveryFee: 20000,
-          status: DeliveryStatus.pending,
-          createdAt: DateTime.now().subtract(const Duration(minutes: 10)),
-          distance: 3.8,
-          estimatedTime: 20,
-        ),
-      ];
-    } finally {
-      isLoading.value = false;
+  /// Load available deliveries (orders ready for pickup)
+  Future<void> loadAvailableDeliveries({bool refresh = false}) async {
+    if (refresh) {
+      _availablePage = 1;
+      _hasMoreAvailable = true;
     }
-  }
 
-  Future<void> acceptDelivery(DeliveryItem delivery) async {
+    if (!_hasMoreAvailable && !refresh) return;
+
     isLoading.value = true;
-    try {
-      // TODO: Call API
-      await Future.delayed(const Duration(milliseconds: 500));
+    errorMessage.value = '';
 
-      availableDeliveries.remove(delivery);
-      final accepted = DeliveryItem(
-        id: delivery.id,
-        orderNo: delivery.orderNo,
-        customerName: delivery.customerName,
-        customerPhone: delivery.customerPhone,
-        customerAddress: delivery.customerAddress,
-        customerLat: delivery.customerLat,
-        customerLng: delivery.customerLng,
-        storeName: delivery.storeName,
-        storeAddress: delivery.storeAddress,
-        storeLat: delivery.storeLat,
-        storeLng: delivery.storeLng,
-        totalAmount: delivery.totalAmount,
-        deliveryFee: delivery.deliveryFee,
-        status: DeliveryStatus.accepted,
-        createdAt: delivery.createdAt,
-        distance: delivery.distance,
-        estimatedTime: delivery.estimatedTime,
+    try {
+      final result = await _repository.getDeliveries(
+        type: 'available',
+        page: _availablePage,
       );
-      activeDeliveries.add(accepted);
-      currentDelivery.value = accepted;
+
+      final List<dynamic> deliveriesJson = result['deliveries'] ?? [];
+      final deliveries =
+          deliveriesJson.map((e) => DeliveryModel.fromJson(e)).toList();
+
+      if (refresh) {
+        availableDeliveries.value = deliveries;
+      } else {
+        availableDeliveries.addAll(deliveries);
+      }
+
+      final meta = result['meta'] ?? {};
+      _hasMoreAvailable = (_availablePage < (meta['totalPages'] ?? 1));
+      _availablePage++;
+    } catch (e) {
+      errorMessage.value = e.toString();
+      Get.snackbar('ຜິດພາດ', 'ບໍ່ສາມາດໂຫຼດ deliveries ໄດ້');
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> updateDeliveryStatus(DeliveryStatus newStatus) async {
-    if (currentDelivery.value == null) return;
+  /// Load active deliveries (orders being delivered)
+  Future<void> loadActiveDeliveries({bool refresh = false}) async {
+    if (refresh) {
+      _activePage = 1;
+      _hasMoreActive = true;
+    }
 
-    isLoading.value = true;
+    if (!_hasMoreActive && !refresh) return;
+
     try {
-      // TODO: Call API
-      await Future.delayed(const Duration(milliseconds: 500));
+      final result = await _repository.getDeliveries(
+        type: 'active',
+        page: _activePage,
+      );
 
-      final delivery = currentDelivery.value!;
-      final updated = DeliveryItem(
-        id: delivery.id,
-        orderNo: delivery.orderNo,
-        customerName: delivery.customerName,
-        customerPhone: delivery.customerPhone,
-        customerAddress: delivery.customerAddress,
-        customerLat: delivery.customerLat,
-        customerLng: delivery.customerLng,
-        storeName: delivery.storeName,
-        storeAddress: delivery.storeAddress,
-        storeLat: delivery.storeLat,
-        storeLng: delivery.storeLng,
-        totalAmount: delivery.totalAmount,
-        deliveryFee: delivery.deliveryFee,
-        status: newStatus,
-        createdAt: delivery.createdAt,
-        distance: delivery.distance,
-        estimatedTime: delivery.estimatedTime,
+      final List<dynamic> deliveriesJson = result['deliveries'] ?? [];
+      final deliveries =
+          deliveriesJson.map((e) => DeliveryModel.fromJson(e)).toList();
+
+      if (refresh) {
+        activeDeliveries.value = deliveries;
+      } else {
+        activeDeliveries.addAll(deliveries);
+      }
+
+      final meta = result['meta'] ?? {};
+      _hasMoreActive = (_activePage < (meta['totalPages'] ?? 1));
+      _activePage++;
+
+      // Set current delivery if there's an active one
+      if (activeDeliveries.isNotEmpty && currentDelivery.value == null) {
+        currentDelivery.value = activeDeliveries.first;
+      }
+    } catch (e) {
+      errorMessage.value = e.toString();
+    }
+  }
+
+  /// Load completed deliveries
+  Future<void> loadCompletedDeliveries({bool refresh = false}) async {
+    if (refresh) {
+      _completedPage = 1;
+      _hasMoreCompleted = true;
+    }
+
+    if (!_hasMoreCompleted && !refresh) return;
+
+    try {
+      final result = await _repository.getDeliveries(
+        type: 'completed',
+        page: _completedPage,
+      );
+
+      final List<dynamic> deliveriesJson = result['deliveries'] ?? [];
+      final deliveries =
+          deliveriesJson.map((e) => DeliveryModel.fromJson(e)).toList();
+
+      if (refresh) {
+        completedDeliveries.value = deliveries;
+      } else {
+        completedDeliveries.addAll(deliveries);
+      }
+
+      final meta = result['meta'] ?? {};
+      _hasMoreCompleted = (_completedPage < (meta['totalPages'] ?? 1));
+      _completedPage++;
+    } catch (e) {
+      errorMessage.value = e.toString();
+    }
+  }
+
+  /// Accept a delivery
+  Future<bool> acceptDelivery(DeliveryModel delivery) async {
+    isAccepting.value = true;
+    errorMessage.value = '';
+
+    try {
+      await _repository.acceptDelivery(delivery.orderId);
+
+      // Remove from available and add to active
+      availableDeliveries.removeWhere((d) => d.orderId == delivery.orderId);
+
+      // Reload active deliveries to get updated data
+      await loadActiveDeliveries(refresh: true);
+
+      // Set as current delivery
+      if (activeDeliveries.isNotEmpty) {
+        currentDelivery.value = activeDeliveries.first;
+      }
+
+      Get.snackbar('ສຳເລັດ', 'ຮັບ Order ${delivery.orderNo} ແລ້ວ');
+      return true;
+    } catch (e) {
+      errorMessage.value = e.toString();
+      Get.snackbar('ຜິດພາດ', e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      isAccepting.value = false;
+    }
+  }
+
+  /// Update delivery status
+  Future<bool> updateDeliveryStatus(
+    DeliveryStatus newStatus, {
+    double? currentLat,
+    double? currentLng,
+    String? note,
+  }) async {
+    if (currentDelivery.value == null) return false;
+
+    isUpdatingStatus.value = true;
+    errorMessage.value = '';
+
+    try {
+      await _repository.updateDeliveryStatus(
+        orderId: currentDelivery.value!.orderId,
+        status: newStatus.value,
+        currentLat: currentLat,
+        currentLng: currentLng,
+        note: note,
       );
 
       if (newStatus == DeliveryStatus.delivered) {
-        activeDeliveries.removeWhere((d) => d.id == delivery.id);
-        completedDeliveries.insert(0, updated);
+        // Move to completed
+        activeDeliveries
+            .removeWhere((d) => d.orderId == currentDelivery.value!.orderId);
         currentDelivery.value = null;
-      } else {
-        final index = activeDeliveries.indexWhere((d) => d.id == delivery.id);
-        if (index != -1) {
-          activeDeliveries[index] = updated;
+
+        // Reload completed deliveries
+        await loadCompletedDeliveries(refresh: true);
+
+        // Set next active delivery if any
+        if (activeDeliveries.isNotEmpty) {
+          currentDelivery.value = activeDeliveries.first;
         }
-        currentDelivery.value = updated;
+
+        Get.snackbar('ສຳເລັດ', 'ສົ່ງ Order ສຳເລັດແລ້ວ');
+      } else {
+        // Reload to get updated status
+        await loadActiveDeliveries(refresh: true);
+
+        if (activeDeliveries.isNotEmpty) {
+          currentDelivery.value = activeDeliveries.firstWhere(
+            (d) => d.orderId == currentDelivery.value!.orderId,
+            orElse: () => activeDeliveries.first,
+          );
+        }
+
+        Get.snackbar('ສຳເລັດ', 'ອັບເດດສະຖານະແລ້ວ');
       }
+
+      return true;
+    } catch (e) {
+      errorMessage.value = e.toString();
+      Get.snackbar('ຜິດພາດ', e.toString().replaceAll('Exception: ', ''));
+      return false;
     } finally {
-      isLoading.value = false;
+      isUpdatingStatus.value = false;
     }
   }
 
+  /// Go to next status
+  Future<bool> proceedToNextStatus({
+    double? currentLat,
+    double? currentLng,
+  }) async {
+    final nextStatus = currentDelivery.value?.nextStatus;
+    if (nextStatus == null) return false;
+
+    return updateDeliveryStatus(
+      nextStatus,
+      currentLat: currentLat,
+      currentLng: currentLng,
+    );
+  }
+
+  /// Set current delivery for detail view
+  void setCurrentDelivery(DeliveryModel delivery) {
+    currentDelivery.value = delivery;
+  }
+
+  /// Refresh all deliveries
+  Future<void> refreshDeliveries() async {
+    await loadAllDeliveries();
+  }
+
+  /// Handle new delivery notification
+  void handleNewDeliveryNotification(Map<String, dynamic> data) {
+    // Reload available deliveries when we receive a new delivery notification
+    loadAvailableDeliveries(refresh: true);
+  }
+
+  /// Get status text
   String getStatusText(DeliveryStatus status) {
-    switch (status) {
-      case DeliveryStatus.pending:
-        return 'ລໍຖ້າຮັບ';
-      case DeliveryStatus.accepted:
-        return 'ຮັບແລ້ວ';
-      case DeliveryStatus.pickedUp:
-        return 'ຮັບອາຫານແລ້ວ';
-      case DeliveryStatus.delivering:
-        return 'ກຳລັງສົ່ງ';
-      case DeliveryStatus.delivered:
-        return 'ສົ່ງສຳເລັດ';
+    return status.label;
+  }
+
+  /// Get deliveries for current tab
+  List<DeliveryModel> get currentTabDeliveries {
+    switch (selectedTab.value) {
+      case 0:
+        return availableDeliveries;
+      case 1:
+        return activeDeliveries;
+      case 2:
+        return completedDeliveries;
+      default:
+        return availableDeliveries;
+    }
+  }
+
+  /// Check if can load more for current tab
+  bool get canLoadMore {
+    switch (selectedTab.value) {
+      case 0:
+        return _hasMoreAvailable;
+      case 1:
+        return _hasMoreActive;
+      case 2:
+        return _hasMoreCompleted;
+      default:
+        return false;
+    }
+  }
+
+  /// Load more for current tab
+  Future<void> loadMore() async {
+    switch (selectedTab.value) {
+      case 0:
+        await loadAvailableDeliveries();
+        break;
+      case 1:
+        await loadActiveDeliveries();
+        break;
+      case 2:
+        await loadCompletedDeliveries();
+        break;
     }
   }
 }

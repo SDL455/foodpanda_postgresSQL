@@ -111,7 +111,15 @@ class StatCard extends StatelessWidget {
     return Obx(() {
       String displayValue;
       if (isCurrency) {
-        displayValue = '${(value.value as double).toStringAsFixed(0)}₭';
+        // Handle both int and double for currency
+        final numValue = value.value;
+        if (numValue is int) {
+          displayValue = '${numValue}₭';
+        } else if (numValue is double) {
+          displayValue = '${numValue.toStringAsFixed(0)}₭';
+        } else {
+          displayValue = '${numValue}₭';
+        }
       } else if (value.value is double) {
         displayValue = '${value.value}${suffix ?? ''}';
       } else {

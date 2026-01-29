@@ -17,12 +17,15 @@ import 'package:foodpanda/pages/profile/bindings/profile_binding.dart';
 import 'package:foodpanda/pages/profile/views/profile_view.dart';
 import 'package:foodpanda/pages/rider/bindings/rider_binding.dart';
 import 'package:foodpanda/pages/rider/views/rider_main_view.dart';
+import 'package:foodpanda/pages/rider/views/rider_notifications_view.dart';
 import 'package:foodpanda/pages/splash/bindings/splash_binding.dart';
 import 'package:foodpanda/pages/splash/views/splash_view.dart';
 
 // Restaurant pages
-import 'package:foodpanda/pages/restaurant/bindings/restaurant_detail_binding.dart';
-import 'package:foodpanda/pages/restaurant/views/restaurant_detail_view.dart';
+import 'package:foodpanda/pages/restaurant_details/bindings/restaurant_detail_binding.dart';
+import 'package:foodpanda/pages/restaurant_details/views/restaurant_detail_view.dart';
+import 'package:foodpanda/pages/restaurants/bindings/restaurants_binding.dart';
+import 'package:foodpanda/pages/restaurants/views/restaurants_view.dart';
 
 // New pages
 import 'package:foodpanda/pages/address/bindings/address_binding.dart';
@@ -77,6 +80,13 @@ class AppPages {
       name: AppRoutes.checkout,
       page: () => const CheckoutView(),
       binding: CheckoutBinding(),
+    ),
+
+    // Restaurant List (All Restaurants)
+    GetPage(
+      name: AppRoutes.restaurants,
+      page: () => const RestaurantsView(),
+      binding: RestaurantsBinding(),
     ),
 
     // Restaurant Detail
@@ -146,6 +156,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.riderMain,
       page: () => const RiderMainView(),
+      binding: RiderBinding(),
+    ),
+
+    // Rider Notifications
+    GetPage(
+      name: AppRoutes.riderNotifications,
+      page: () => const RiderNotificationsView(),
       binding: RiderBinding(),
     ),
   ];
