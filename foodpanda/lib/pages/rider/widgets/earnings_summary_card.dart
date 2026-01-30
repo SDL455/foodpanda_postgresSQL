@@ -128,8 +128,11 @@ class EarningsSummaryItem extends StatelessWidget {
         Obx(() {
           String displayValue;
           if (isCurrency) {
+            // Safely convert to double: API may return int or double
             final v = value.value;
-            final n = v is int ? v.toDouble() : (v as num).toDouble();
+            final double n = (v is num)
+                ? v.toDouble()
+                : double.tryParse(v.toString()) ?? 0.0;
             displayValue = '${n.toStringAsFixed(0)}₭';
           } else {
             displayValue = '${value.value}$suffix';
